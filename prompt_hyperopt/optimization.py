@@ -100,6 +100,7 @@ def configuration_space_greedy_climb(
                 best_cost = cost
                 best_configuration = next_configuration
                 best_results = results
+                best_arr_conf = next_arr_conf
                 if change is not None:
                     last_change_hp_index, last_change_hp_value_index = change
                 else:
