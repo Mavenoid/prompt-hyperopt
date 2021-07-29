@@ -61,8 +61,9 @@ def configuration_space_greedy_climb(
         else:
             last_eval = False
             change = (next_hp_index, next_hp_value_index)
+            hp = configuration_space.get_hyperparameters()[next_hp_index]
             if not isinstance(
-                configuration_space.get_hyperparameters()[next_hp_index], CategoricalHyperparameter
+                hp, CategoricalHyperparameter
             ):
                 next_hp_index += 1
                 next_hp_value_index = 0
