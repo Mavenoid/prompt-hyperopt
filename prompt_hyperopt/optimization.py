@@ -6,9 +6,6 @@ import random
 import logging
 
 
-logger = logging.getLogger(__name__)
-
-
 def configuration_space_greedy_climb(
     configuration_space: ConfigurationSpace,
     evaluator: Callable[[Configuration], Any],
@@ -33,6 +30,8 @@ def configuration_space_greedy_climb(
         if not isinstance(hp, CategoricalHyperparameter):
             if not isinstance(hp, Constant):
                 raise NotImplementedError()
+
+    logger = logging.getLogger("prompt_hyperopt.greedy")
 
     # Compact representation
     best_arr_conf = np.nan_to_num(initial_configuration.get_array())
