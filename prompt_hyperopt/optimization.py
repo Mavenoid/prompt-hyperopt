@@ -94,13 +94,22 @@ def configuration_space_greedy_climb(
             except:
                 continue
 
-            if change is not None:
-                logger.info("Evaluating change: %s -> %r", hp.name, hp.choices[change[1]])
-            else:
-                logger.info("Evaluating non-neighboring configuration")
-
             results = evaluator(next_configuration)
             cost = cost_getter(results)
+
+            if change is not None:
+                logger.info(
+                    "%s Evaluated change (cost: %f): %s -> %r.",
+                    "New best!" if cost < best_cost else "No change.",
+                    cost,
+                    hp.name, hp.choices[change[1]]
+                )
+            else:
+                logger.info("%s Evaluated non-neighboring configuration (cost: %f).",
+                    "New best!" if cost < best_cost else "No change.",
+                    cost,
+                )
+
             last_eval = True
             if cost < best_cost:
                 best_cost = cost
@@ -112,9 +121,7 @@ def configuration_space_greedy_climb(
                 else:
                     last_change_hp_index = next_hp_index
                     last_change_hp_value_index = next_hp_value_index
-                logger.info(
-                    "New best cost: %f", best_cost
-                )
+
         if (
             change is not None
             and next_hp_index == last_change_hp_index
