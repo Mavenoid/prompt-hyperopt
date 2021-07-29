@@ -21,6 +21,13 @@ def configuration_space_greedy_climb(
 
     Returns the best found configuration, its results from the evaluator,
     and its cost.
+
+    Use the following for verbosity:
+
+        import logging
+        logging.getLogger("prompt_hyperopt.greedy").setLevel(logging.INFO)
+
+    Note that this has to be set before running the method for the first time.
     """
     if random_sampler is None:
         random_sampler = lambda: configuration_space.sample_configuration()
