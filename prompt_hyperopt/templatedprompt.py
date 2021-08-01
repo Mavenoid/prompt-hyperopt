@@ -4,9 +4,11 @@ from typing import Any, Dict, Optional, List, Tuple
 import ConfigSpace
 import datasets
 import jinja2, jinja2.nativetypes
+import numpy as np
 
 import configurationspace
 import optimization
+import gpt
 
 
 @dataclass
@@ -90,6 +92,52 @@ class TemplatedPrompt:
             configuration=configuration,
             **known_values,
         )["prompt"].strip()
+
+    # @TODO clean up
+    def get_answer_logprobs(
+        self,
+        engine: str,
+        known_values:Dict,
+        answer:str,
+        configuration: Optional[ConfigSpace.Configuration]=None,
+        answer_field:str="answer",
+    ) -> Dict:
+        """Returns a dict with token_logprobs, mean, and total."""
+        configuration = configuration or self._configuration
+        empty_prompt = self(
+            configuration,
+            **{answer_field: gpt.ENDOFANSWER, **known_values},
+        )
+        reference_prompt = self(
+            configuration,
+            **{answer_field: answer+gpt.ENDOFANSWER, **known_values},
+        )
+        evaluation_prompt = self(
+            configuration,
+            **{answer_field: answer, **known_values},
+        )
+        if gpt.ENDOFANSWER not in empty_prompt or gpt.ENDOFANSWER not in reference_prompt:
+            raise ValueError("Start-of-answer token must be encoded exactly.")
+
+        completion_start_index = empty_prompt.rfind(gpt.ENDOFANSWER)
+        completion_start_token_position = len(gpt.gpt_tokenizer.encode(empty_prompt[:completion_start_index].strip()))
+        completion_end_index = reference_prompt.rfind(gpt.ENDOFANSWER)
+        completion_end_token_position = len(gpt.gpt_tokenizer.encode(reference_prompt[:completion_end_index].strip()))
+
+        if completion_start_token_position == completion_end_token_position:
+            raise ValueError()
+
+        logprobs = gpt.get_model_logprobs(engine=engine, prompt=evaluation_prompt.strip())
+        answer_logprobs = logprobs[completion_start_token_position:completion_end_token_position]
+
+        if not len(answer_logprobs):
+            raise ValueError()
+
+        return dict(
+            token_logprobs=answer_logprobs,
+            mean=np.mean(answer_logprobs),
+            total=np.sum(answer_logprobs),
+        )
 
     # @TODO move evaluate_task
     def optimize_greedily(self, engine:str, evaluate_task, examples) -> None:
