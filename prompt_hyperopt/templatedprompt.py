@@ -87,6 +87,7 @@ class TemplatedPrompt:
         configuration: Optional[ConfigSpace.Configuration]=None,
         **known_values: Dict,
     ) -> str:
+        """Format prompt with the current configuration and provided arguments"""
         return self._format_options(
             configuration=configuration,
             **known_values,
