@@ -52,14 +52,13 @@ class TemplatedPrompt:
                     formatted[key] = available_values[v]
                     continue
             formatted[key] = v
-
         formatted.update(known_values)
+
         env = jinja2.nativetypes.NativeEnvironment(
             keep_trailing_newline=True,
             optimized = False,
-            extensions=["jinja2.ext.debug","jinja2.ext.do","jinja2.ext.loopcontrols","jinja2.ext.with_"],
+            extensions=["jinja2.ext.debug","jinja2.ext.do","jinja2.ext.loopcontrols"],
         )
-
         while True:
             any_change = False
             last_exception = None
