@@ -9,14 +9,6 @@ import configurationspace
 import optimization
 
 
-# @dataclass
-# class PromptTask:
-#     training_dataset: datasets.Dataset
-#     evaluation_dataset: 
-
-#     def evaluate
-
-
 @dataclass
 class TemplatedPrompt:
     """Templated prompt which can be optimized."""
