@@ -36,3 +36,20 @@ def test_get_samples_answer_logprobs(
         dataset_answer_mapping={"True":"True", "False":"False"},
     )
     assert sample_logprobs[0]["True"]-sample_logprobs[0]["False"] > sample_logprobs[1]["True"]-sample_logprobs[1]["False"]
+
+def test_get_samples_answers_loss(true_false_samples):
+    accuracy_loss = sampleevaluation.get_samples_answers_loss(
+        available_answers=["True", "False"],
+        samples=true_false_samples + true_false_samples,
+        sample_answer_logprobs=[
+            {"True":-1, "False":-2},
+            {"True":-1, "False":-3},
+            {"True":-3, "False":-2},
+            {"True":-2, "False":-3},
+        ],
+        temperature=1,
+        biases=[0,0],
+        dataset_answer_field="truthfulness",
+        loss_name="accuracy",
+    )
+    assert accuracy_loss == 0.25
