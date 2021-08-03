@@ -59,6 +59,30 @@ pip install prompt_hyperopt
 
 Curiously, out of the box, prompts which seem to provide mostly accurate predictions for one language model does not perform well for others - even bordering on random answers. Notably this can be observed for GPT3-curie 6.7B vs GPT3-davinci 175B. What we have found however is that by recalibrating token biases for the two models, then often high-performing prompts for one model are also high-performing for the other. This can be done by using the utility method TODO.
 
+## Examples
+
+### Sentiment analysis
+
+```
+trompt = TemplatedPrompt(
+    prompt="""{{preamble}}
+
+Statement: {{sentence}}
+Sentiment: {{sentiment}}
+""",
+    options=dict(
+        answer_positive=["Positive", "happy", "Positive sentiment", "🙂", "😀"],
+        answer_negative=["Negative", "sad", "Negative sentiment", "☹", "😡", "😞"],
+        answer_neutral=["Neutral", "neither", "ambivalent", "Neutral sentiment", "😐", "😶"],
+        preamble=["", "Sentiment analysis", "Tell whether the sentence is Positive or Negative"]
+    ),
+)
+
+trompt.optimize()
+
+trompt.complete(sentence="They always put too much cream")
+```
+
 ## Results
 
 On [https://paperswithcode.com/sota/question-answering-on-boolq](Bool-Q), prompt hyperoptimization produces an accuracy of 81.3 % with 32 examples for GPT-3 davinci, in contrast to previous results of GPT-3 few-shot on 32 examples. TODO confirm. TODO fill in more.
