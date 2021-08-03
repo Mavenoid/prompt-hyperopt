@@ -2,15 +2,39 @@
 
 Optimize prompts for language models with hyperparameter optimization.
 
+## Why
+
+Finding reliable prompts can be a difficult and time-consuming task. It can seem like one experiments succeeds only to find the next example going on seemingly random tangents for others. Trying to fix prompts for one example may break previously-tried examples, and revalidating all examples is often not an efficient workflow.
+
+Enter prompt hyperoptimization.
+
+It is easier to come up with ideas for the different ways a task prompt can be expressed -- Maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it's separate from the task description? Maybe you want a preamble that explains what the task is about?
+
+The human provides this creative, contrained, optimization; and the library does some of the lifting. Use templates to express your ideas for prompt variants, provide a few examples of expected results, and run an optimization to find the prompt that best fit the examples.
+
+By using token probabilities and tuning parameters such as `temperature`, an informative evaluation can be made even with a few examples; and by using hyperparameter-optimization approaches, the number of evaluations to find the best prompts can be kept to a minimum. Evaluations can also be cached to prevent unnecessary reruns.
+
+The new workflow to engineer prompts becomes:
+1. Come up with an initial prompt and a few sensible variations.
+2. Come up with a few examples of expected results.
+3. Run the optimization.
+4. Inspect the examples that fail and add a few new examples or variations to hopefully fix them.
+5. Repeat 3-4 until happy with the performance.
+
+## How
+
 This library provides convenient methods to express prompt alternatives for a task and use hyperparameter-optimization techniques to find the best one. This approach has the benefit that it works without access to gradients (such as with GPT3), significant time and resource budgets for optimization, and it generalizes well also for small datasets (e.g. 3-30 examples). For projects where these limitations are not factors, one should expect to see better results fine proper fine tuning or [https://arxiv.org/pdf/2104.08691.pdf](prompt tuning).
 
 Prompt hyperparameter optimization should perform better than traditinoal few-shot learning prompts and worse than proper fine tuning. Even if a project can afford to fine tune however, it may be advantageous to prototype and iterate more quickly with this library.
 
 ## Features
 
-* Optimize temperature.
-* Calibrate token biases without [https://arxiv.org/pdf/2102.09690.pdf](providing neutral prompts).
-* Initiate optimization with smaller language models and calibrate them for larger models.
+* Optimize `temperature` and `top_p` rather than guessing.
+* Calibrate token biases to get results similar to [https://arxiv.org/pdf/2102.09690.pdf](neutral-prompt calibration).
+* Optimize for prompts which generate parseable results.
+* Find prompts that best conform to expected outputs.
+* Initiate optimization with smaller language models and recalibrate prompts for larger models.
+* Minimize unproductive evaluations using Hyperband Bayesian Optimization via [https://automl.github.io/](hpbandster).
 
 ## Installation
 
