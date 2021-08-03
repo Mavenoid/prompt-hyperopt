@@ -14,6 +14,7 @@ def configuration_space_greedy_climb(
     random_sampler: Optional[Callable[[], Configuration]] = None,
     max_iterations: Optional[int] = None,
     random_exploration_chance: float = 0.2,
+    min_relative_improvement: float = 1e-3,
     warmup_iterations: Optional[int] = None,
 ) -> Tuple[Configuration, Any, float]:
     """
@@ -52,6 +53,7 @@ def configuration_space_greedy_climb(
     next_hp_value_index = 0
     last_change_hp_index = next_hp_index
     last_change_hp_value_index = next_hp_value_index
+    last_change_cost = best_cost
 
     last_eval = False
     # @TODO consider counting evaluations for iterations instead
@@ -119,9 +121,10 @@ def configuration_space_greedy_climb(
                 best_arr_conf = next_arr_conf
                 if change is not None:
                     last_change_hp_index, last_change_hp_value_index = change
-                else:
+                elif cost < (1+min_relative_improvement) * last_change_cost:
                     last_change_hp_index = next_hp_index
                     last_change_hp_value_index = next_hp_value_index
+                    last_change_cost = best_cost
 
         if (
             change is not None
