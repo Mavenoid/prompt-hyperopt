@@ -14,6 +14,7 @@ def configuration_space_greedy_climb(
     random_sampler: Optional[Callable[[], Configuration]] = None,
     max_iterations: Optional[int] = None,
     random_exploration_chance: float = 0.2,
+    warmup_iterations: Optional[int] = None,
 ) -> Tuple[Configuration, Any, float]:
     """
     Find a local optima in the configuration space through dimension-wise
@@ -60,7 +61,7 @@ def configuration_space_greedy_climb(
         if it == 0:
             next_arr_conf = np.nan_to_num(best_configuration.get_array())
             change = None
-        elif last_eval and random.random() < random_exploration_chance:
+        elif (last_eval and random.random() < random_exploration_chance) or it <= (warmup_iterations or 0):
             change = None
             next_configuration = random_sampler()
             next_arr_conf = np.nan_to_num(next_configuration.get_array())
