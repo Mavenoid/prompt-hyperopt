@@ -114,7 +114,7 @@ def configuration_space_greedy_climb(
                 )
 
             last_eval = True
-            if cost < best_cost:
+            if cost <= best_cost:
                 best_cost = cost
                 best_configuration = next_configuration
                 best_results = results
