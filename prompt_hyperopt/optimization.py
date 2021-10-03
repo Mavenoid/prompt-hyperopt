@@ -1,6 +1,6 @@
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import Constant, CategoricalHyperparameter
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Set, Tuple
 import numpy as np
 import random
 import logging
@@ -16,6 +16,8 @@ def configuration_space_greedy_climb(
     random_exploration_chance: float = 0.2,
     min_relative_improvement: float = 1e-3,
     warmup_iterations: Optional[int] = None,
+    included_hyperparameter_names: Optional[Set[str]]=None,
+    excluded_hyperparameter_names: Optional[Set[str]]=None,
 ) -> Tuple[Configuration, Any, float]:
     """
     Find a local optima in the configuration space through dimension-wise
@@ -71,8 +73,14 @@ def configuration_space_greedy_climb(
             last_eval = False
             change = (next_hp_index, next_hp_value_index)
             hp = configuration_space.get_hyperparameters()[next_hp_index]
-            if not isinstance(
-                hp, CategoricalHyperparameter
+            if (
+                not isinstance(
+                    hp, CategoricalHyperparameter
+                ) or (
+                    excluded_hyperparameter_names and hp.name in excluded_hyperparameter_names
+                ) or (
+                    included_hyperparameter_names and hp.name not in included_hyperparameter_names
+                )
             ):
                 next_hp_index += 1
                 next_hp_value_index = 0
