@@ -16,6 +16,7 @@ def configuration_space_greedy_climb(
     random_exploration_chance: float = 0.2,
     min_relative_improvement: float = 1e-3,
     warmup_iterations: Optional[int] = None,
+    new_best_callback: Optional[Callable[[Configuration,Any,float],bool]] = None,
     included_hyperparameter_names: Optional[Set[str]]=None,
     excluded_hyperparameter_names: Optional[Set[str]]=None,
 ) -> Tuple[Configuration, Any, float]:
@@ -133,7 +134,13 @@ def configuration_space_greedy_climb(
                     last_change_hp_index = next_hp_index
                     last_change_hp_value_index = next_hp_value_index
                     last_change_cost = best_cost
-
+                if new_best_callback:
+                    if new_best_callback(
+                        best_configuration,
+                        best_results,
+                        best_cost,
+                    ):
+                        break
         if (
             change is not None
             and next_hp_index == last_change_hp_index
