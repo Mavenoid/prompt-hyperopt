@@ -8,9 +8,9 @@ Finding reliable prompts can be a difficult and time-consuming task. It can seem
 
 Enter prompt hyperoptimization.
 
-It is easier to come up with ideas for the different ways a task prompt can be expressed -- Maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it's separate from the task description? Maybe you want a preamble that explains what the task is about?
+It is easier to come up with ideas for the different ways a task prompt can be expressed -- Maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it is separate from the task description? Maybe you want a preamble that explains what the task is about?
 
-The human provides this creative, contrained, optimization; and the library does some of the lifting. Use templates to express your ideas for prompt variants, provide a few examples of expected results, and run an optimization to find the prompt that best fit the examples.
+The human provides this creative constrained optimization; and the library does some of the lifting. Use templates to express your ideas for prompt variants, provide a few examples of expected results, and run an optimization to find the prompt that best fit the examples.
 
 By using token probabilities and tuning parameters such as `temperature`, an informative evaluation can be made even with a few examples; and by using hyperparameter-optimization approaches, the number of evaluations to find the best prompts can be kept to a minimum. Evaluations can also be cached to prevent unnecessary reruns.
 
