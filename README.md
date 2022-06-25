@@ -4,7 +4,7 @@ Optimize prompts for language models with hyperparameter optimization.
 
 ## Why
 
-Finding reliable prompts can be a difficult and time-consuming task. It can seem like one experiments succeeds only to find the next example going on seemingly random tangents for others. Trying to fix prompts for one example may break previously-tried examples, and revalidating all examples is often not an efficient workflow.
+Finding reliable prompts can be a difficult and time-consuming task. It can seem like one experiment succeeds only to find the next example going on a seemingly random tangent. Trying to fix prompts for one example may break previously-tried examples, and revalidating all examples is often not an efficient workflow.
 
 Enter prompt hyperoptimization.
 
