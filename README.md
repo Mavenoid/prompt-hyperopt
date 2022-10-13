@@ -1,6 +1,6 @@
 # prompt-hyperopt
 
-Optimize prompts for language models with hyperparameter optimization.
+Optimize prompts for language models with hyperparameter optimization with few examples and generalization across different language models.
 
 ## Why
 
