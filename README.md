@@ -10,9 +10,9 @@ Enter prompt hyperoptimization.
 
 It is easier to come up with ideas for the different ways a task prompt can be expressed -- Maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it is separate from the task description? Maybe you want a preamble that explains what the task is about?
 
-The human provides this creative constrained optimization; and the library does some of the lifting. Use templates to express your ideas for prompt variants, provide a few examples of expected results, and run an optimization to find the prompt that best fit the examples.
+The human provides this creative constrained optimization; and the library does some of the lifting to find the best among options. Use intuitive templates to express your ideas for prompt variants, provide a few examples of expected results, and run an optimization to find the prompt that best fit the examples.
 
-By using token probabilities and tuning parameters such as `temperature`, an informative evaluation can be made even with a few examples; and by using hyperparameter-optimization approaches, the number of evaluations to find the best prompts can be kept to a minimum. Evaluations can also be cached to prevent unnecessary reruns.
+By using token probabilities and tuning parameters such as `temperature`, an informative evaluation can be made even with a few examples; and by using hyperparameter-optimization approaches, the number of evaluations to find the best prompts can be kept to a minimum. Evaluations can also be cached to prevent unnecessary reruns. Long hyperparameter runs can initially be done on smaller=faster=cheaper models and then adapted and tuned further on larger models.
 
 The new workflow to engineer prompts becomes:
 1. Come up with an initial prompt and a few sensible variations.
