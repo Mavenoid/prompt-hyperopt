@@ -23,18 +23,18 @@ The new workflow to engineer prompts becomes:
 
 ## How
 
-This library provides convenient methods to express prompt alternatives for a task and use hyperparameter-optimization techniques to find the best one. This approach has the benefit that it works without access to gradients (such as with GPT3), significant time and resource budgets for optimization, and it generalizes well also for small datasets (e.g. 3-30 examples). For projects where these limitations are not factors, one should expect to see better results fine proper fine tuning or [https://arxiv.org/pdf/2104.08691.pdf](prompt tuning).
+This library provides convenient methods to express prompt alternatives for a task and use hyperparameter-optimization techniques to find the best one. This approach has the benefit that it works without access to gradients (such as with GPT3), significant time and resource budgets for optimization, and it generalizes well also for small datasets (e.g. 3-30 examples). For projects where these limitations are not factors, one should expect to see better results fine proper fine tuning or [prompt tuning](https://arxiv.org/pdf/2104.08691.pdf).
 
 Prompt hyperparameter optimization should perform better than traditinoal few-shot learning prompts and worse than proper fine tuning. Even if a project can afford to fine tune however, it may be advantageous to prototype and iterate more quickly with this library.
 
 ## Features
 
 * Optimize `temperature` and `top_p` rather than guessing.
-* Calibrate token biases to get results similar to [https://arxiv.org/pdf/2102.09690.pdf](neutral-prompt calibration).
+* Calibrate token biases to get results similar to [neutral-prompt calibration](https://arxiv.org/pdf/2102.09690.pdf).
 * Optimize for prompts which generate parseable results.
 * Find prompts that best conform to expected outputs.
 * Initiate optimization with smaller language models and recalibrate prompts for larger models.
-* Minimize unproductive evaluations using Hyperband Bayesian Optimization via [https://automl.github.io/](hpbandster).
+* Minimize unproductive evaluations using Hyperband Bayesian Optimization via [hpbandster](https://automl.github.io).
 
 ## Installation
 
@@ -85,7 +85,7 @@ trompt.complete(sentence="They always put too much cream")
 
 ## Results
 
-On [https://paperswithcode.com/sota/question-answering-on-boolq](Bool-Q), prompt hyperoptimization produces an accuracy of 81.3 % with 32 examples for GPT-3 davinci, in contrast to previous results of GPT-3 few-shot on 32 examples. TODO confirm. TODO fill in more.
+On [Bool-Q](https://paperswithcode.com/sota/question-answering-on-boolq), prompt hyperoptimization produces an accuracy of 81.3 % with 32 examples for GPT-3 davinci, in contrast to previous results of GPT-3 few-shot on 32 examples. TODO confirm. TODO fill in more.
 
 Best found prompt for Bool-Q (with 1-shot examples):
 
