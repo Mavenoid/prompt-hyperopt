@@ -1,18 +1,20 @@
 # prompt-hyperopt
 
-Optimize prompts for language models with hyperparameter optimization with few examples and generalization across different language models.
+More reliable prompt crafting though prompt templates, hyperparameter optimization from few examples, and calibration across language models.
 
 ## Why
 
-Finding reliable prompts can be a difficult and time-consuming task. It can seem like one experiment succeeds only to find the next example going on a seemingly random tangent. Trying to fix prompts for one example may break previously-tried examples, and revalidating all examples is often not an efficient workflow.
+Prompt optimization offers a stuctured way to produce more reliable generation.
 
-Enter prompt hyperoptimization.
+Manually crafting reliable prompts can be a difficult and time-consuming task. It can seem like one experiment succeeds only to find the next example going on a seemingly random tangent. Adapting the prompt to fix one such misbehaving example often breaks a previously-tried example, and revalidating all examples manually is a time consuming.
 
-It is easier to come up with ideas for the different ways a task prompt can be expressed -- Maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it is separate from the task description? Maybe you want a preamble that explains what the task is about?
+## The solution
 
-The human provides this creative constrained optimization; and the library does some of the lifting to find the best among options. Use intuitive templates to express your ideas for prompt variants, provide a few examples of expected results, and run an optimization to find the prompt that best fit the examples.
+Instead, humans should focus on generating ideas for the different ways a task prompt can be expressed. For example, maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it is separate from the task description? Maybe you want a preamble that explains what the task is about or what the generation should not do? When you see a failed generation, you can usually think of a few ways to adjust prompts to steer it in the right direction and so iteratively add more prompt options.
 
-By using token probabilities and tuning parameters such as `temperature`, an informative evaluation can be made even with a few examples; and by using hyperparameter-optimization approaches, the number of evaluations to find the best prompts can be kept to a minimum. Evaluations can also be cached to prevent unnecessary reruns. Long hyperparameter runs can initially be done on smaller=faster=cheaper models and then adapted and tuned further on larger models.
+The task on the human is provide these variants, and the library is responsible for finding the alternative that performs the best with respect to the examples. The library provides intuitive curly-brace templates to express variants more compactly.
+
+By using token probabilities and tuning parameters such as `temperature`, an informative evaluation can be made even with a few examples; and by using hyperparameter-optimization approaches, the number of evaluations to find the best prompts can be kept to a minimum. Evaluations can also be cached to prevent unnecessary reruns. Long hyperparameter runs can initially also be done on smaller (i.e. faster and cheaper) models and then adapted to and tuned further on larger models.
 
 The new workflow to engineer prompts becomes:
 1. Come up with an initial prompt and a few sensible variations.
@@ -21,7 +23,7 @@ The new workflow to engineer prompts becomes:
 4. Inspect the examples that fail and add a few new examples or variations to hopefully fix them.
 5. Repeat 3-4 until happy with the performance.
 
-## How
+## Details
 
 This library provides convenient methods to express prompt alternatives for a task and use hyperparameter-optimization techniques to find the best one. This approach has the benefit that it works without access to gradients (such as with GPT3), significant time and resource budgets for optimization, and it generalizes well also for small datasets (e.g. 3-30 examples). For projects where these limitations are not factors, one should expect to see better results fine proper fine tuning or [prompt tuning](https://arxiv.org/pdf/2104.08691.pdf).
 
@@ -57,7 +59,7 @@ pip install prompt_hyperopt
 
 ## Interesting findings
 
-Curiously, out of the box, prompts which seem to provide mostly accurate predictions for one language model does not perform well for others - even bordering on random answers. Notably this can be observed for GPT3-curie 6.7B vs GPT3-davinci 175B. What we have found however is that by recalibrating token biases for the two models, then often high-performing prompts for one model are also high-performing for the other. This can be done by using the utility method TODO.
+Out of the box, prompts which seem to provide mostly accurate predictions for one language model do not necessarily perform well for others, even bordering on random answers. Notably this can be observed for GPT3-curie 6.7B vs GPT3-davinci 175B. What we have found however is that by recalibrating token biases for the two models, then often high-performing prompts for one model are also high-performing for the other. This can be done by using the utility method TODO.
 
 ## Examples
 
