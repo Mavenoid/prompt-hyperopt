@@ -43,9 +43,11 @@ test_examples = examples[-3:]
 # @TODO investigate why "" gets encoded as None
 
 trompt = prompt_hyperopt.TemplatedPrompt(
-    prompt="""{{preamble}}{{options}}
+    prompt="""{{example}}
 
-Statement: {{sentence}}{{separator}}Sentiment: {{sentiment}}
+{{preamble}}{{options}}
+
+Statement: {{sentence}}{{separator}}{{sentiment_label}} {{sentiment}}
 """,
     available_answers=[
         "{{answer_positive}}", "{{answer_negative}}", "{{answer_neutral}}"
@@ -61,6 +63,16 @@ Statement: {{sentence}}{{separator}}Sentiment: {{sentiment}}
             " Options: {{answer_positive}}, {{answer_negative}}, {{answer_neutral}}",
         ],
         separator=[" ", "\n", "\\n", " -- "],
+        sentiment_label=[
+            "Sentiment:",
+            "The statement's sentiment is",
+            "Q: What is the sentiment? A: The answer is",
+        ],
+        example=[
+            "",
+            """Q: Roger has 5 tennis balls. He buys 2 more cans of tennis balls. Each can has 3 tennis balls. How many tennis balls does he have now?
+A: Roger started with 5 balls. 2 cans of 3 tennis balls each is 6 tennis balls. 5 + 6 = 11. The answer is 11.""",
+        ]
     ),
 )
 
