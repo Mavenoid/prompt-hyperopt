@@ -31,6 +31,7 @@ Prompt hyperparameter optimization should perform better than traditional few-sh
 
 ## Features
 
+* Seemlessly switch between API language-models such as GPT3 and locally-run models such as GPT2, GPT-J and Flan-T5.
 * Optimize `temperature` and `top_p` rather than guessing.
 * Calibrate token biases to get results similar to [neutral-prompt calibration](https://arxiv.org/pdf/2102.09690.pdf).
 * Optimize for prompts which generate parseable results rather than going off script.
