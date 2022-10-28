@@ -24,14 +24,20 @@ engines = [
 
 examples=[
     dict(sentence="I am happy", sentiment="Positive"),
+    dict(sentence="Price to high for a product with problems.", sentiment="Negative"),
+    dict(sentence="a good but expensive gimmick.", sentiment="Neutral"),
     dict(sentence="Cake for the third Friday in a row! 😢😛", sentiment="Positive"),
-    dict(sentence="Break a leg!", sentiment="Positive"),
-    dict(sentence="It started good but for most of the song, all I could hear was the bass", sentiment="Negative"),
+    dict(sentence="Solid Keyboard. Upgrade the keys, it worth it.", sentiment="Positive"),
     dict(sentence=":((((", sentiment="Negative"),
     dict(sentence="That's just what I needed today!", sentiment="Negative"),
     dict(sentence="Turn right", sentiment="Neutral"),
+    dict(sentence="Break a leg!", sentiment="Positive"),
+    dict(sentence="It started good but for most of the song, all I could hear was the bass", sentiment="Negative"),
     dict(sentence="Four is greater than three", sentiment="Neutral"),
 ]
+
+dev_examples = examples[:-3]
+test_examples = examples[-3:]
 
 trompt = prompt_hyperopt.TemplatedPrompt(
     prompt="""{{preamble}}
@@ -63,8 +69,8 @@ for engine in engines:
             optimize_parameters=True,
             optimization_loss_name="sqcost",
             start_index=0,
-            stop_index=len(examples),
-            dataset=examples,
+            stop_index=len(dev_examples),
+            dataset=dev_examples,
             dataset_context_field=None,
             dataset_question_field="sentence",
             dataset_answer_field="sentiment",
@@ -75,9 +81,40 @@ for engine in engines:
                 "Neutral": "{{answer_neutral}}"
             },
         ),
-        lambda results: results["sqcost"],#results["logloss"],#results["sqcost"] * (1 + results["logloss"]),
+        lambda results: results["sqcost"] * (1 + results["logloss"]),
         initial_configuration=best_config,
         early_termination_cost=1e-3,
+        max_iterations=64,
+        verbosity=1,
     )
+
+    test_results = prompt_hyperopt.datasets.evaluate_boolean_dataset(
+        trompt,
+        engine,
+        best_config,
+        optimization_loss_name="sqcost",
+        start_index=0,
+        stop_index=len(test_examples),
+        dataset=test_examples,
+        dataset_context_field=None,
+        dataset_question_field="sentence",
+        dataset_answer_field="sentiment",
+        dataset_answer_mapping={
+            "Positive": "{{answer_positive}}",
+            "Negative": "{{answer_negative}}",
+            "Neutral": "{{answer_neutral}}"
+        },
+        temperature=best_results["temperature"],
+        answer2bias=best_results["answer2bias"],
+    )
+
+    print("--- Engine: %s ---" % engine)
+
+    print("Dev results: " + repr(best_results))
+    print("Test results: " + repr(test_results))
+
+    print("Best configuration:")
+    print(best_config)
+
     if best_cost <= 1e-3:
         break
