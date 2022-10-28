@@ -52,25 +52,29 @@ Sentiment: {{sentiment}}
 
 cs = trompt.get_configuration_space()
 
-prompt_hyperopt.optimization.configuration_space_greedy_climb(
-    cs,
-    lambda config: prompt_hyperopt.datasets.evaluate_boolean_dataset(
-        engine,
-        trompt,
-        optimize_parameters=True,
-        optimization_loss_name="sqcost",
-        start_index=0,
-        stop_index=len(examples),
-        dataset=examples,
-        dataset_context_field=None,
-        dataset_question_field="sentence",
-        dataset_answer_field="sentiment",
-        # Note: These are trompts and will be filled during optimization.
-        dataset_answer_mapping={
-            "Positive": "{{answer_positive}}",
-            "Negative": "{{answer_negative}}",
-            "Neutral": "{{answer_neutral}}"},
-    ),
-    lambda results: results["sqcost"] * (1 + results["logloss"]),
-    max_iterations=32,
-)
+best_config = None
+for engine in engines:
+    best_config, best_results, best_cost = prompt_hyperopt.optimization.configuration_space_greedy_climb(
+        cs,
+        lambda config: prompt_hyperopt.datasets.evaluate_boolean_dataset(
+            trompt,
+            engine,
+            config,
+            optimize_parameters=True,
+            optimization_loss_name="sqcost",
+            start_index=0,
+            stop_index=len(examples),
+            dataset=examples,
+            dataset_context_field=None,
+            dataset_question_field="sentence",
+            dataset_answer_field="sentiment",
+            # Note: These are trompts and will be filled during optimization.
+            dataset_answer_mapping={
+                "Positive": "{{answer_positive}}",
+                "Negative": "{{answer_negative}}",
+                "Neutral": "{{answer_neutral}}"
+            },
+        ),
+        lambda results: results["sqcost"],#results["logloss"],#results["sqcost"] * (1 + results["logloss"]),
+        initial_configuration=best_config,
+    )
