@@ -6,12 +6,13 @@ engine = "ada"
 
 examples=[
     dict(sentence="I am happy", sentiment="Positive"),
+    dict(sentence="Cake for the third Friday in a row! 😢😛", sentiment="Positive"),
+    dict(sentence="Break a leg!", sentiment="Positive"),
     dict(sentence="It started good but for most of the song, all I could hear was the bass", sentiment="Negative"),
     dict(sentence=":((((", sentiment="Negative"),
-    dict(sentence="Cake for the third Friday in a row! 😢😛", sentiment="Positive"),
-    dict(sentence="It won't work", sentiment="Negative"),
+    dict(sentence="That's just what I needed today!", sentiment="Negative"),
     dict(sentence="Turn right", sentiment="Neutral"),
-    dict(sentence="Nothing special to say", sentiment="Neutral"),
+    dict(sentence="Four is greater than three", sentiment="Neutral"),
 ]
 
 trompt = prompt_hyperopt.TemplatedPrompt(
