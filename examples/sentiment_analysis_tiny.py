@@ -32,9 +32,13 @@ examples=[
     dict(sentence=":((((", sentiment="Negative"),
     dict(sentence="That's just what I needed today!", sentiment="Negative"),
     dict(sentence="Turn right", sentiment="Neutral"),
+    # Will be used for post-optimization evaluation
     dict(sentence="Break a leg!", sentiment="Positive"),
     dict(sentence="It started good but for most of the song, all I could hear was the bass", sentiment="Negative"),
     dict(sentence="Four is greater than three", sentiment="Neutral"),
+    dict(sentence="Does this come with a charger?", sentiment="Neutral"),
+    dict(sentence="Design can be better", sentiment="Negative"),
+    dict(sentence="Powerful device", sentiment="Positive"),
 ]
 
 dev_examples = examples[:-3]
