@@ -72,7 +72,7 @@ Statement: {{sentence}}{{separator}}{{sentiment_label}}{{sentiment}}
             " ({{answer_positive}}/{{answer_negative}}/{{answer_neutral}})",
             " Options: {{answer_positive}}, {{answer_negative}}, {{answer_neutral}}",
         ],
-        separator=[" ", "\n", "\\n", " -- "],
+        separator=[" ", "\n", "\n\n", "\\n", " -- "],
         sentiment_label=[
             "Sentiment: ",
             "Sentiment:\n",
