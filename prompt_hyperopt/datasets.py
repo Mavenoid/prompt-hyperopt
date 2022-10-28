@@ -1,4 +1,5 @@
 import datasets
+import ConfigSpace
 import logging
 import scipy.optimize
 import numpy as np
@@ -8,8 +9,9 @@ from .templatedprompt import TemplatedPrompt
 
 
 def evaluate_boolean_dataset(
-    engine: str,
     trompt: TemplatedPrompt,
+    engine: str,
+    config: ConfigSpace.ConfigurationSpace,
     dataset=datasets.Dataset,
     dataset_context_field:Optional[str]=None, # @TODO make functions?
     dataset_question_field="question",
@@ -44,6 +46,7 @@ def evaluate_boolean_dataset(
             answer: trompt.get_answer_logprobs(
                 engine,
                 known_values,
+                configuration=config,
                 answer=dataset_answer_mapping[answer],
                 answer_field=dataset_answer_field,
             )["total"]
