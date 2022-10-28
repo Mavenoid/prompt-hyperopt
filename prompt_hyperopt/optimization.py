@@ -19,6 +19,7 @@ def configuration_space_greedy_climb(
     new_best_callback: Optional[Callable[[Configuration,Any,float],bool]] = None,
     included_hyperparameter_names: Optional[Set[str]]=None,
     excluded_hyperparameter_names: Optional[Set[str]]=None,
+    early_termination_cost: Optional[float]=None,
 ) -> Tuple[Configuration, Any, float]:
     """
     Find a local optima in the configuration space through dimension-wise
@@ -141,6 +142,11 @@ def configuration_space_greedy_climb(
                         best_cost,
                     ):
                         break
+        if (
+            early_termination_cost is not None
+            and best_cost <= early_termination_cost
+        ):
+            break
         if (
             change is not None
             and next_hp_index == last_change_hp_index
