@@ -52,7 +52,7 @@ Sentiment: {{sentiment}}
         answer_positive=["Positive", "happy", "Positive sentiment", "🙂", "😀"],
         answer_negative=["Negative", "sad", "Negative sentiment", "☹", "😡", "😞"],
         answer_neutral=["Neutral", "neither", "ambivalent", "Neutral sentiment", "😐", "😶"],
-        preamble=["", "Sentiment analysis.", "Label the statement as either Positive or Negative"],
+        preamble=["", "Sentiment analysis.", "Assign the sentiment of the statement"],
     ),
 )
 
