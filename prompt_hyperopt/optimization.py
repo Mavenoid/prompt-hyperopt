@@ -38,8 +38,7 @@ def configuration_space_greedy_climb(
     """
     if random_sampler is None:
         random_sampler = lambda: configuration_space.sample_configuration()
-    if initial_configuration is None:
-        initial_configuration = random_sampler()
+
     for hp in configuration_space.get_hyperparameters():
         if not isinstance(hp, CategoricalHyperparameter):
             if not isinstance(hp, Constant):
@@ -49,10 +48,15 @@ def configuration_space_greedy_climb(
     logger.setLevel(logging.INFO if verbosity > 0 else logging.WARNING)
 
     # Compact representation
+    if initial_configuration is None:
+        initial_configuration = random_sampler()
+        best_results = None
+        best_cost = float("inf")
+    else:
+        best_results = evaluator(initial_configuration)
+        best_cost = cost_getter(best_results)
     best_arr_conf = np.nan_to_num(initial_configuration.get_array())
     best_configuration = initial_configuration
-    best_results = None
-    best_cost = float("inf")
 
     # Iterate until no change or max iterations
     next_hp_index = random.randrange(len(best_arr_conf))
