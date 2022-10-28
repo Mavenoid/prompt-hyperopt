@@ -40,7 +40,7 @@ dev_examples = examples[:-3]
 test_examples = examples[-3:]
 
 trompt = prompt_hyperopt.TemplatedPrompt(
-    prompt="""{{preamble}}
+    prompt="""{{preamble}}{{options}}
 
 Statement: {{sentence}}
 Sentiment: {{sentiment}}
@@ -53,6 +53,11 @@ Sentiment: {{sentiment}}
         answer_negative=["Negative", "sad", "Negative sentiment", "☹", "😡", "😞"],
         answer_neutral=["Neutral", "neither", "ambivalent", "Neutral sentiment", "😐", "😶"],
         preamble=["", "Sentiment analysis.", "Assign the sentiment of the statement"],
+        options=[
+            "",
+            ". ({{answer_positive}}/{{answer_negative}}/{{answer_neutral}})",
+            ". Options: {{answer_positive}}, {{answer_negative}}, {{answer_neutral}}",
+        ]
     ),
 )
 
