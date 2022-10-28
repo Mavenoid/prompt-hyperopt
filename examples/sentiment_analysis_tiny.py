@@ -39,11 +39,12 @@ examples=[
 dev_examples = examples[:-3]
 test_examples = examples[-3:]
 
+# @TODO investigate why "" gets encoded as None
+
 trompt = prompt_hyperopt.TemplatedPrompt(
     prompt="""{{preamble}}{{options}}
 
-Statement: {{sentence}}
-Sentiment: {{sentiment}}
+Statement: {{sentence}}{{separator}}Sentiment: {{sentiment}}
 """,
     available_answers=[
         "{{answer_positive}}", "{{answer_negative}}", "{{answer_neutral}}"
@@ -52,12 +53,13 @@ Sentiment: {{sentiment}}
         answer_positive=["Positive", "happy", "Positive sentiment", "🙂", "😀"],
         answer_negative=["Negative", "sad", "Negative sentiment", "☹", "😡", "😞"],
         answer_neutral=["Neutral", "neither", "ambivalent", "Neutral sentiment", "😐", "😶"],
-        preamble=["", "Sentiment analysis.", "Assign the sentiment of the statement"],
+        preamble=[" ", "Sentiment analysis.", "Assign the sentiment of the statement."],
         options=[
-            "",
-            ". ({{answer_positive}}/{{answer_negative}}/{{answer_neutral}})",
-            ". Options: {{answer_positive}}, {{answer_negative}}, {{answer_neutral}}",
-        ]
+            " ",
+            " ({{answer_positive}}/{{answer_negative}}/{{answer_neutral}})",
+            " Options: {{answer_positive}}, {{answer_negative}}, {{answer_neutral}}",
+        ],
+        separator=[" ", "\n", "\\n", " -- "],
     ),
 )
 
