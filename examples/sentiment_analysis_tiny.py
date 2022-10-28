@@ -16,6 +16,7 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 # logging.getLogger("prompt_hyperopt.greedy").setLevel(logging.DEBUG)
 
 engines = [
+    "gpt2",
     "text-ada-001",
     "text-babbage-001",
     "text-curie-001",
