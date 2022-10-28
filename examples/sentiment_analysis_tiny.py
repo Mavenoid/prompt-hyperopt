@@ -60,7 +60,13 @@ Statement: {{sentence}}{{separator}}{{sentiment_label}}{{sentiment}}
         answer_positive=["Positive", "happy", "Positive sentiment", "🙂", "😀"],
         answer_negative=["Negative", "sad", "Negative sentiment", "☹", "😡", "😞"],
         answer_neutral=["Neutral", "neither", "ambivalent", "Neutral sentiment", "😐", "😶"],
-        preamble=[" ", "Sentiment analysis.", "Assign the sentiment of the statement."],
+        preamble=[
+            " ",
+            "Sentiment analysis.",
+            "Assign the sentiment of the statement.",
+            "Classify the sentiment of the statement",
+            "Determine how people feel about the statement.",
+        ],
         options=[
             " ",
             " ({{answer_positive}}/{{answer_negative}}/{{answer_neutral}})",
