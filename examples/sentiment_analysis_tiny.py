@@ -51,7 +51,7 @@ trompt = prompt_hyperopt.TemplatedPrompt(
 
 {{preamble}}{{options}}
 
-Statement: {{sentence}}{{separator}}{{sentiment_label}} {{sentiment}}
+Statement: {{sentence}}{{separator}}{{sentiment_label}}{{sentiment}}
 """,
     available_answers=[
         "{{answer_positive}}", "{{answer_negative}}", "{{answer_neutral}}"
@@ -68,9 +68,10 @@ Statement: {{sentence}}{{separator}}{{sentiment_label}} {{sentiment}}
         ],
         separator=[" ", "\n", "\\n", " -- "],
         sentiment_label=[
-            "Sentiment:",
-            "The statement's sentiment is",
-            "Q: What is the sentiment? A: The answer is",
+            "Sentiment: ",
+            "Sentiment:\n",
+            "The statement's sentiment is ",
+            "Q: What is the sentiment? A: The answer is ",
         ],
         example=[
             "",
