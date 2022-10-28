@@ -25,7 +25,7 @@ engines = [
 examples=[
     dict(sentence="I am happy", sentiment="Positive"),
     dict(sentence="Price to high for a product with problems.", sentiment="Negative"),
-    dict(sentence="a good but expensive gimmick.", sentiment="Neutral"),
+    dict(sentence="language for thinking.", sentiment="Neutral"),
     dict(sentence="Cake for the third Friday in a row! 😢😛", sentiment="Positive"),
     dict(sentence="Solid Keyboard. Upgrade the keys, it worth it.", sentiment="Positive"),
     dict(sentence=":((((", sentiment="Negative"),
