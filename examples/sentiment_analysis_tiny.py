@@ -3,7 +3,6 @@ import prompt_hyperopt.optimization
 from prompt_hyperopt import TemplatedPrompt
 import logging
 
-engine = "ada"
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,6 +15,12 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 
 # logging.getLogger("prompt_hyperopt.greedy").setLevel(logging.DEBUG)
 
+engines = [
+    "text-ada-001",
+    "text-babbage-001",
+    "text-curie-001",
+    "text-davinci-002",
+]
 
 examples=[
     dict(sentence="I am happy", sentiment="Positive"),
