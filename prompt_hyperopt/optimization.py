@@ -20,6 +20,7 @@ def configuration_space_greedy_climb(
     included_hyperparameter_names: Optional[Set[str]]=None,
     excluded_hyperparameter_names: Optional[Set[str]]=None,
     early_termination_cost: Optional[float]=None,
+    verbosity: int = 0,
 ) -> Tuple[Configuration, Any, float]:
     """
     Find a local optima in the configuration space through dimension-wise
@@ -45,6 +46,7 @@ def configuration_space_greedy_climb(
                 raise NotImplementedError()
 
     logger = logging.getLogger("prompt_hyperopt.greedy")
+    logger.setLevel(logging.INFO if verbosity > 0 else logging.WARNING)
 
     # Compact representation
     best_arr_conf = np.nan_to_num(initial_configuration.get_array())
@@ -62,7 +64,8 @@ def configuration_space_greedy_climb(
     last_eval = False
     # @TODO consider counting evaluations for iterations instead
     for it in range(max_iterations or 9999999):
-        logger.info("Iteration %i. Current best: %f.", it, best_cost)
+        if verbosity >= 2:
+            logger.info("Iteration %i. Current best: %f.", it, best_cost)
         next_arr_conf = None
         if it == 0:
             next_arr_conf = np.nan_to_num(best_configuration.get_array())
@@ -110,18 +113,19 @@ def configuration_space_greedy_climb(
             results = evaluator(next_configuration)
             cost = cost_getter(results)
 
-            if change is not None:
-                logger.info(
-                    "%s Evaluated change (cost: %f): %s -> %r.",
-                    "New best!" if cost < best_cost else "No change.",
-                    cost,
-                    hp.name, hp.choices[change[1]]
-                )
-            else:
-                logger.info("%s Evaluated non-neighboring configuration (cost: %f).",
-                    "New best!" if cost < best_cost else "No change.",
-                    cost,
-                )
+            if cost < best_cost or verbosity >= 2:
+                if change is not None:
+                    logger.info(
+                        "%s Evaluated change (cost: %f): %s -> %r.",
+                        "New best!" if cost < best_cost else "No change.",
+                        cost,
+                        hp.name, hp.choices[change[1]]
+                    )
+                else:
+                    logger.info("%s Evaluated non-neighboring configuration (cost: %f).",
+                        "New best!" if cost < best_cost else "No change.",
+                        cost,
+                    )
 
             last_eval = True
             if cost <= best_cost:
