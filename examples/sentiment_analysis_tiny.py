@@ -91,7 +91,7 @@ for engine in engines:
         lambda results: results["sqcost"] * (1 + results["logloss"]),
         initial_configuration=best_config,
         early_termination_cost=1e-3,
-        max_iterations=64,
+        max_iterations=128,
         verbosity=1,
     )
 
