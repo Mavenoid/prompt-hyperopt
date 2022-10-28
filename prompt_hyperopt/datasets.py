@@ -24,6 +24,7 @@ def evaluate_boolean_dataset(
     optimization_loss_name="sqcost",
     answer2bias:Optional[Dict[Any,float]]=None,
     temperature:Optional[float]=None,
+    uncalibrated_confidences_weight:float=1e-3,
 ) -> Dict:
     """Evaluate a TemplatedPrompt on a boolean dataset."""
     # @TODO make part of task
@@ -95,18 +96,23 @@ def evaluate_boolean_dataset(
             answer2bias = dict(zip(available_answers, [0.] * len(available_answers)))
 
     biases = list(answer2bias.values())
-    biases = [x-biases[-1] for x in biases[:-1]]
-    for i, bias in enumerate(biases):
-        if bias == 0.:
-            logging.error(
-                "Optimized bias is zero - this is unexpected other than for trivial datasets."
-            )
-            biases[i] = 1e-3
-    x = get_loss(temperature, *biases, loss_name="logloss")
-    return dict(
-        accuracy=get_loss(temperature, *biases, loss_name="accuracy"),
-        logloss=get_loss(temperature, *biases, loss_name="logloss"),
-        sqcost=get_loss(temperature, *biases, loss_name="sqcost"),
+    calibrated_biases = [x-biases[-1] for x in biases[:-1]]
+    results = dict(
+        answer2bias=answer2bias,
+        temperature=temperature,
+    )
+    for k in [
+        "accuracy",
+        "logloss",
+        "sqcost",
+    ]:
+        l1 = get_loss(temperature, *biases, loss_name=k)
+        l2 = get_loss(temperature, *calibrated_biases, loss_name=k)
+        results[k] = (
+            uncalibrated_confidences_weight * l1
+            + (1-uncalibrated_confidences_weight) * l2
+        )
+    return results
 
 
 def evaluate_boolq(
