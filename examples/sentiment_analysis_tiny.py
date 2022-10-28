@@ -77,4 +77,7 @@ for engine in engines:
         ),
         lambda results: results["sqcost"],#results["logloss"],#results["sqcost"] * (1 + results["logloss"]),
         initial_configuration=best_config,
+        early_termination_cost=1e-3,
     )
+    if best_cost <= 1e-3:
+        break
