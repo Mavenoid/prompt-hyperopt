@@ -107,6 +107,37 @@ def evaluate_boolean_dataset(
         accuracy=get_loss(temperature, *biases, loss_name="accuracy"),
         logloss=get_loss(temperature, *biases, loss_name="logloss"),
         sqcost=get_loss(temperature, *biases, loss_name="sqcost"),
+
+
+def evaluate_boolq(
+    engine: str,
+    trompt: TemplatedPrompt,
+    config: ConfigSpace.ConfigurationSpace,
+    dataset=None,
+    domain_context=None,
+    start_index=0,
+    stop_index=8,
+    optimize_parameters:bool=False,
+    optimization_loss_name="sqcost",
+    answer2bias:Optional[Dict]=None,
+    temperature:Optional[float]=None,
+) -> Dict:
+    """Evaluate a TemplatedPrompt on the BoolQ dataset."""
+    if dataset is None:
+        dataset = datasets.load_dataset("boolq")
+    return evaluate_boolean_dataset(
+        trompt=trompt,
+        engine=engine,
+        config=config,
+        dataset=dataset,
+        dataset_context_field="passage",
+        dataset_question_field="question",
+        dataset_answer_field="answer",
+        dataset_answer_mapping={True:"{{answer_yes}}", False:"{{answer_no}}"},
+        domain_context=domain_context,
+        start_index=start_index,
+        stop_index=stop_index,
+        optimize_parameters=optimize_parameters,
         answer2bias=answer2bias,
         temperature=temperature,
     )
