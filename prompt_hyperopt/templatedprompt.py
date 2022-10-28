@@ -2,13 +2,12 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, List, Tuple
 
 import ConfigSpace
-import datasets
 import jinja2, jinja2.nativetypes
 import numpy as np
 
-import configurationspace
-import optimization
-import gpt
+from . import configurationspace
+from . import optimization
+from . import gpt
 
 
 @dataclass
