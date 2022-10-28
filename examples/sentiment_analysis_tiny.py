@@ -121,5 +121,10 @@ for engine in engines:
     print("Best configuration:")
     print(best_config)
 
+    print("Best prompt:")
+    print("<<<")
+    print(trompt(best_config))
+    print(">>>")
+
     if best_cost <= 1e-3:
         break
