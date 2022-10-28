@@ -19,6 +19,8 @@ def configuration_space_greedy_climb(
     new_best_callback: Optional[Callable[[Configuration,Any,float],bool]] = None,
     included_hyperparameter_names: Optional[Set[str]]=None,
     excluded_hyperparameter_names: Optional[Set[str]]=None,
+    early_termination_cost: Optional[float]=None,
+    verbosity: int = 0,
 ) -> Tuple[Configuration, Any, float]:
     """
     Find a local optima in the configuration space through dimension-wise
@@ -36,20 +38,25 @@ def configuration_space_greedy_climb(
     """
     if random_sampler is None:
         random_sampler = lambda: configuration_space.sample_configuration()
-    if initial_configuration is None:
-        initial_configuration = random_sampler()
+
     for hp in configuration_space.get_hyperparameters():
         if not isinstance(hp, CategoricalHyperparameter):
             if not isinstance(hp, Constant):
                 raise NotImplementedError()
 
     logger = logging.getLogger("prompt_hyperopt.greedy")
+    logger.setLevel(logging.INFO if verbosity > 0 else logging.WARNING)
 
     # Compact representation
+    if initial_configuration is None:
+        initial_configuration = random_sampler()
+        best_results = None
+        best_cost = float("inf")
+    else:
+        best_results = evaluator(initial_configuration)
+        best_cost = cost_getter(best_results)
     best_arr_conf = np.nan_to_num(initial_configuration.get_array())
     best_configuration = initial_configuration
-    best_results = None
-    best_cost = float("inf")
 
     # Iterate until no change or max iterations
     next_hp_index = random.randrange(len(best_arr_conf))
@@ -61,7 +68,8 @@ def configuration_space_greedy_climb(
     last_eval = False
     # @TODO consider counting evaluations for iterations instead
     for it in range(max_iterations or 9999999):
-        logger.info("Iteration %i. Current best: %f.", it, best_cost)
+        if verbosity >= 2:
+            logger.info("Iteration %i. Current best: %f.", it, best_cost)
         next_arr_conf = None
         if it == 0:
             next_arr_conf = np.nan_to_num(best_configuration.get_array())
@@ -109,18 +117,19 @@ def configuration_space_greedy_climb(
             results = evaluator(next_configuration)
             cost = cost_getter(results)
 
-            if change is not None:
-                logger.info(
-                    "%s Evaluated change (cost: %f): %s -> %r.",
-                    "New best!" if cost < best_cost else "No change.",
-                    cost,
-                    hp.name, hp.choices[change[1]]
-                )
-            else:
-                logger.info("%s Evaluated non-neighboring configuration (cost: %f).",
-                    "New best!" if cost < best_cost else "No change.",
-                    cost,
-                )
+            if cost < best_cost or verbosity >= 2:
+                if change is not None:
+                    logger.info(
+                        "%s Evaluated change (cost: %f): %s -> %r.",
+                        "New best!" if cost < best_cost else "No change.",
+                        cost,
+                        hp.name, hp.choices[change[1]]
+                    )
+                else:
+                    logger.info("%s Evaluated non-neighboring configuration (cost: %f).",
+                        "New best!" if cost < best_cost else "No change.",
+                        cost,
+                    )
 
             last_eval = True
             if cost <= best_cost:
@@ -141,6 +150,11 @@ def configuration_space_greedy_climb(
                         best_cost,
                     ):
                         break
+        if (
+            early_termination_cost is not None
+            and best_cost <= early_termination_cost
+        ):
+            break
         if (
             change is not None
             and next_hp_index == last_change_hp_index

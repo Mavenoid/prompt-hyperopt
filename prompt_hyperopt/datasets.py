@@ -1,4 +1,5 @@
 import datasets
+import ConfigSpace
 import logging
 import scipy.optimize
 import numpy as np
@@ -8,8 +9,9 @@ from .templatedprompt import TemplatedPrompt
 
 
 def evaluate_boolean_dataset(
-    engine: str,
     trompt: TemplatedPrompt,
+    engine: str,
+    config: ConfigSpace.ConfigurationSpace,
     dataset=datasets.Dataset,
     dataset_context_field:Optional[str]=None, # @TODO make functions?
     dataset_question_field="question",
@@ -22,7 +24,9 @@ def evaluate_boolean_dataset(
     optimization_loss_name="sqcost",
     answer2bias:Optional[Dict[Any,float]]=None,
     temperature:Optional[float]=None,
+    uncalibrated_confidences_weight:float=1e-3,
 ) -> Dict:
+    """Evaluate a TemplatedPrompt on a boolean dataset."""
     # @TODO make part of task
     available_answers = set(dataset_answer_mapping.keys())
     used_answers = {dataset[i][dataset_answer_field] for i in range(start_index, stop_index)}
@@ -44,6 +48,7 @@ def evaluate_boolean_dataset(
             answer: trompt.get_answer_logprobs(
                 engine,
                 known_values,
+                configuration=config,
                 answer=dataset_answer_mapping[answer],
                 answer_field=dataset_answer_field,
             )["total"]
@@ -91,18 +96,54 @@ def evaluate_boolean_dataset(
             answer2bias = dict(zip(available_answers, [0.] * len(available_answers)))
 
     biases = list(answer2bias.values())
-    biases = [x-biases[-1] for x in biases[:-1]]
-    for i, bias in enumerate(biases):
-        if bias == 0.:
-            logging.error(
-                "Optimized bias is zero - this is unexpected other than for trivial datasets."
-            )
-            biases[i] = 1e-3
-    x = get_loss(temperature, *biases, loss_name="logloss")
-    return dict(
-        accuracy=get_loss(temperature, *biases, loss_name="accuracy"),
-        logloss=get_loss(temperature, *biases, loss_name="logloss"),
-        sqcost=get_loss(temperature, *biases, loss_name="sqcost"),
+    calibrated_biases = [x-biases[-1] for x in biases[:-1]]
+    results = dict(
+        answer2bias=answer2bias,
+        temperature=temperature,
+    )
+    for k in [
+        "accuracy",
+        "logloss",
+        "sqcost",
+    ]:
+        l1 = get_loss(temperature, *biases, loss_name=k)
+        l2 = get_loss(temperature, *calibrated_biases, loss_name=k)
+        results[k] = (
+            uncalibrated_confidences_weight * l1
+            + (1-uncalibrated_confidences_weight) * l2
+        )
+    return results
+
+
+def evaluate_boolq(
+    engine: str,
+    trompt: TemplatedPrompt,
+    config: ConfigSpace.ConfigurationSpace,
+    dataset=None,
+    domain_context=None,
+    start_index=0,
+    stop_index=8,
+    optimize_parameters:bool=False,
+    optimization_loss_name="sqcost",
+    answer2bias:Optional[Dict]=None,
+    temperature:Optional[float]=None,
+) -> Dict:
+    """Evaluate a TemplatedPrompt on the BoolQ dataset."""
+    if dataset is None:
+        dataset = datasets.load_dataset("boolq")
+    return evaluate_boolean_dataset(
+        trompt=trompt,
+        engine=engine,
+        config=config,
+        dataset=dataset,
+        dataset_context_field="passage",
+        dataset_question_field="question",
+        dataset_answer_field="answer",
+        dataset_answer_mapping={True:"{{answer_yes}}", False:"{{answer_no}}"},
+        domain_context=domain_context,
+        start_index=start_index,
+        stop_index=stop_index,
+        optimize_parameters=optimize_parameters,
         answer2bias=answer2bias,
         temperature=temperature,
     )

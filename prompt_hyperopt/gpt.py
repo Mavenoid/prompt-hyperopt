@@ -11,8 +11,22 @@ import openai
 
 gpt_tokenizer = transformers.AutoTokenizer.from_pretrained("gpt2")
 ENDOFANSWER = "<|answer|>"  #@TODO use rare tokens?
+# @TODO check that these are complete
 OPENAI_API_ENGINE_NAMES = [
-    "ada", "babbage", "curie", "curie-instruct-beta", "davinci", "davinci-instruct-beta"
+    "ada",
+    "babbage",
+    "curie",
+    "curie-instruct-beta",
+    "davinci",
+    "davinci-instruct-beta",
+    "text-ada-001",
+    "text-babbage-001",
+    "text-curie-001",
+    "text-davinci-001",
+    "text-davinci-002",
+    "code-cushman-001",
+    "code-davinci-001",
+    "code-davinci-002",
 ]
 
 
