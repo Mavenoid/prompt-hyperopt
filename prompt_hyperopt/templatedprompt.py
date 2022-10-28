@@ -34,6 +34,9 @@ class TemplatedPrompt:
             )
         )
 
+    def get_configuration_space(self):
+        return self._configuration_space
+
     def _format_options(
         self,
         configuration: Optional[ConfigSpace.Configuration]=None,
