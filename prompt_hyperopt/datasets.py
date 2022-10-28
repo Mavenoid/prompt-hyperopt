@@ -31,7 +31,9 @@ def evaluate_boolean_dataset(
     available_answers = set(dataset_answer_mapping.keys())
     used_answers = {dataset[i][dataset_answer_field] for i in range(start_index, stop_index)}
     if not used_answers.issubset(available_answers):
-        raise ValueError()
+        raise ValueError(
+            "The dataset expects answers which are not available among answer options: %r" % used_answers.difference(available_answers)
+        )
     available_answers = sorted(available_answers)
 
     sample_dicts = []
