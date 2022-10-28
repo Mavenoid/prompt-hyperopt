@@ -1,8 +1,21 @@
 import prompt_hyperopt.datasets
 import prompt_hyperopt.optimization
 from prompt_hyperopt import TemplatedPrompt
+import logging
 
 engine = "ada"
+
+logging.basicConfig(level=logging.DEBUG)
+
+# Decrease logigng spam
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
+
+
+
+# logging.getLogger("prompt_hyperopt.greedy").setLevel(logging.DEBUG)
+
 
 examples=[
     dict(sentence="I am happy", sentiment="Positive"),
