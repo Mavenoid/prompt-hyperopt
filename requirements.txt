@@ -1,0 +1,6 @@
+datasets>=2.6
+transformers>=4.10
+configspace>=0.6
+scipy>=1.9
+openai>=0.24
+jinja2>=1.2
