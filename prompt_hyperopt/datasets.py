@@ -25,6 +25,7 @@ def evaluate_boolean_dataset(
     answer2bias:Optional[Dict[Any,float]]=None,
     temperature:Optional[float]=None,
 ) -> Dict:
+    """Evaluate a TemplatedPrompt on a boolean dataset."""
     # @TODO make part of task
     available_answers = set(dataset_answer_mapping.keys())
     used_answers = {dataset[i][dataset_answer_field] for i in range(start_index, stop_index)}
