@@ -2,6 +2,8 @@
 
 More reliable prompt crafting though prompt templates, hyperparameter optimization from few examples, and calibration of and across language models.
 
+![tests status](https://github.com/mavenoid/prompt-hyperopt/actions/workflows/tests.yml/badge.svg)
+
 ## Why
 
 Prompt optimization offers a stuctured way to produce more reliable generation.
