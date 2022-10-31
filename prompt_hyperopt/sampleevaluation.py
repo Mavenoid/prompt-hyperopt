@@ -5,11 +5,11 @@ import numpy as np
 import scipy.optimize
 import sys
 
-import templatedprompt
+from .templatedprompt import TemplatedPrompt
 
 
 def get_samples_answer_logprobs(
-    trompt: templatedprompt.TemplatedPrompt,
+    trompt: TemplatedPrompt,
     configuration: ConfigSpace.Configuration,
     engine: str,
     samples: List[Dict],
@@ -152,7 +152,7 @@ def evaluate_samples_answers(
 
 
 def optimize_and_evaluate_trompt_samples(
-    trompt: templatedprompt.TemplatedPrompt,
+    trompt: TemplatedPrompt,
     configuration: ConfigSpace.Configuration,
     engine: str,
     samples: List[Dict],

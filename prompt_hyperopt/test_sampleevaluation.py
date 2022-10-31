@@ -2,13 +2,13 @@ import pytest
 
 import ConfigSpace
 
-import templatedprompt
-import sampleevaluation
+from .templatedprompt import TemplatedPrompt
+from . import sampleevaluation
 
 
 @pytest.fixture
 def singular_true_false_trompt():
-    return templatedprompt.TemplatedPrompt(
+    return TemplatedPrompt(
         prompt="Statement: {{statement}}. {{question_label}}: {{truthfulness}}",
         available_answers=["True", "False"],
         options=dict(
