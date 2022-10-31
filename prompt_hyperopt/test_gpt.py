@@ -1,14 +1,14 @@
 from typing import Any, Callable, Dict, Optional, Tuple
 import numpy as np
 
-import gpt
-import templatedprompt
+from . import gpt
+from .templatedprompt import TemplatedPrompt
 
 import pytest
 
 @pytest.fixture
 def singular_qa_trompt():
-    return templatedprompt.TemplatedPrompt(
+    return TemplatedPrompt(
         prompt="{{question_prefix}}{{question}}\n{{answer_prefix}}{{answer}}",
         available_answers=["Yes", "No"], # @TODO drop?
         options=dict(

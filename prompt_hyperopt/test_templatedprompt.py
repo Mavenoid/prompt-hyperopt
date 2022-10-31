@@ -1,10 +1,10 @@
 import pytest
 
-import templatedprompt
+from .templatedprompt import TemplatedPrompt
 
 @pytest.fixture
 def single_alternative_trompt():
-    return templatedprompt.TemplatedPrompt(
+    return TemplatedPrompt(
         prompt="The {{best_term}} color is {{answer}}",
         available_answers=["amaranth"], # @TODO drop?
         options=dict(
