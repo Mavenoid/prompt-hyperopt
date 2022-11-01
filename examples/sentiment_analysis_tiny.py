@@ -23,6 +23,10 @@ engines = [
     "text-davinci-002",
 ]
 
+if not os.environ.get("OPENAI_API_KEY"):
+    print("Please set or input OPENAI_API_KEY environment variable")
+    os.environ["OPEN_API_KEY"] = input("OPENAI_API_KEY=")
+
 examples=[
     dict(sentence="I am happy", sentiment="Positive"),
     dict(sentence="Price to high for a product with problems.", sentiment="Negative"),
