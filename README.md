@@ -43,22 +43,111 @@ Prompt hyperparameter optimization should perform better than traditional few-sh
 
 ## Installation
 
-TODO
+For the full installation, simply `pip install prompt_hyperopt`. Note that this
+presently also includes heavy dependencies like `torch` and `transformers`.
 
-```
-pip install prompt_hyperopt
-```
+To execute tests, use `pip install prompt_hyperopt[dev]` or `pip install -e .[dev]` if checked out.
 
 ## Getting started
 
-### Evaluating a prompt variant
+### Expressing what you want
 
+After installing, the first step to use the library is to make a handful
+examples of what you expect the prompt to generate. Each input can have
+one or more input values and should have exactly one output.
 
+For example, if you want to optimize story generation, you could write a 
+few examples with an input of a preceding paragraph, and the output
+should be the next generated sentence.
 
-### Expressing prompt variants
+```python
+from prompt_hyperopt import PromptHyperopt
 
+examples = [
+    {
+        "story": "While out on a walk, I found a $20 bill. As I was picking it up, I saw a homeless man watching me.",
+        "continuation": "I handed him the money and he smiled.",
+    },
+    {
+        "story": "The dog was hungry.",
+        "continuation": "So she ate the food.",
+    },
+]
+```
 
-### Finding the best prompt variant
+The way this optimization works, you must also provide a number of answer
+options, including examples continuations that you would not like to see.
+
+```python
+
+possible_continuations = [
+    examples[0]["continuation"],
+    examples[1]["continuation"],
+    "I set fire to the bill."
+    "So she ordered a pizza.",
+    "Once upon a time...",
+    "\n\n",
+]
+```
+
+### Defining the prompt options
+
+Next come up with a few different ways to express the prompt. This is
+done using curly-brace templates option lists. You should not provide
+options for the inputs and outputs of the examples.
+
+```python
+trompt = TemplatedPrompt(
+    """{preamble}
+
+{story}{separation}{continuation}""",
+    options=dict(
+        preamble=[
+            "Write a continuation to the following story:",
+            "This is the most amazing story ever:",
+            "A paragraph from a best-selling novel:",
+        ],
+        separation=[
+            "\n\n", "\n", " ",
+            "\n\nStory continuation: ",
+        ],
+    ),
+)
+```
+
+### Finding the best prompt
+
+With the template and examples, we can now optimize the prompt. The
+`TemplatedPrompt` class provides a convenient interface to do this.
+In order to do the optimization, the library needs to know the
+relation between the examples and the template, which is done through
+the field `targets_field_mapping`. This describes what fields in the
+template should be prediceted vs filled statically. For more complex
+datasets, additional fields may need to be specified.
+
+Note also that if your template is complex, this will need to
+generate a lot of examples, and depending on the engine you use, this
+may both take a while and be costly.
+
+```python
+
+engine = "text-curie-001"
+
+trompt.optimize(
+    engine,
+    examples,
+    targets_field_mapping={
+        "continuation": "continuation",
+    },
+)
+```
+
+Then print the best prompt:
+
+```python
+print(trompt(story="<story>, continuation="<continuation>"))
+```
+
 
 ## Interesting findings
 
