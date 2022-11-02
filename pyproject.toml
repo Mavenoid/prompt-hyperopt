@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prompt-hyperopt"
+version = "0.1.0"
+authors = [
+    {name="Mavenoid", email="info@mavenoid.com"},
+    {name="Cenny Wenner", email="cwenner@gmail.com"},
+]
