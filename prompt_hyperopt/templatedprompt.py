@@ -208,3 +208,58 @@ class TemplatedPrompt:
         return self.optimize_greedily(*args, **kwargs)
 
 
+@dataclass
+class OptimizedPrompt:
+    """Optimized templated prompt. Can be used by filling
+    remaining slots."""
+
+    template: TemplatedPrompt
+    configuration: ConfigSpace.Configuration
+    temperature: float = 1.0
+    answer2bias: Dict[str, float] = field(default_factory=dict)
+
+    def __call__(self, **known_values: Dict) -> str:
+        return self.template(
+            configuration=self.configuration,
+            **known_values,
+        )
+
+    def predict_proba(
+        self,
+        engine: str,
+        known_values: Dict,
+        answer_field: str="answer",
+    ) -> Dict:
+        answer2logprob_data = {}
+        for answer in self.answer2bias.keys():
+            answer2logprob_data[answer] = self.template._get_answer_logprobs(
+                engine=engine,
+                known_values=known_values,
+                answer=answer,
+                configuration=self.configuration,
+                answer_field=answer_field,
+            )
+        answer2prob = {
+            answer: np.exp(
+                (data["total"] + self.answer2bias[answer])
+                / (1e-3 + self.temperature)
+            )
+            for answer, data in answer2logprob_data.items()
+        }
+        total = sum(answer2prob.values())
+        answer2prob = {
+            answer: logprob / total
+            for answer, logprob in answer2prob.items()
+        }
+        return answer2prob
+
+    def predict(
+        self,
+        engine: str,
+        **known_values: Dict,
+    ) -> str:
+        answer2prob = self.predict_proba(
+            engine=engine,
+            known_values=known_values,
+        )
+        return sorted(answer2prob.items(), key=lambda x: x[1], reverse=True)[0][0]
