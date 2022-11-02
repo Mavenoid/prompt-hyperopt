@@ -1,71 +1,132 @@
-from typing import Any, Dict, Optional, List
+from dataclasses import dataclass
+import datasets
+from typing import Any, Dict, Optional, List, Union
 
 import ConfigSpace
 import numpy as np
 import scipy.optimize
 import sys
 
-from .templatedprompt import TemplatedPrompt
+
+@dataclass
+class _RemappedSample:
+    features: Dict[str, str]
+    target_field_name: str
+    target_dataset_field_name: str
+    target_value: str
+    target_available_values: List[str]
+    target_available_value2label: List[str] #@TODO restructure
+    domain_context: Optional[str] = None
+    sample_context: Optional[str] = None
 
 
-def get_samples_answer_logprobs(
-    trompt: TemplatedPrompt,
+def _remap_samples(
+    samples,
+    features_field_mapping: Dict[str, str],
+    targets_field_mapping: Dict[str, str],
+    targets_value_mapping: Optional[Dict[str, Dict[Any, str]]]=None,
+    # @TODO drop in favor of features?
+    domain_context: Optional[str] = None,
+    context_dataset_field: Optional[str] = None,
+) -> List[_RemappedSample]:
+    if len(targets_field_mapping) > 1:
+        raise NotImplementedError(
+            "Currently only optimizing a single target field at a time is supported."
+        )
+    elif len(targets_field_mapping) == 0:
+        raise ValueError("No target field specified.")
+    answer_field = list(targets_field_mapping.keys())[0]
+    answer_dataset_field = targets_field_mapping[answer_field]
+
+    used_dataset_answers = {
+        sample[answer_dataset_field]
+        for sample in samples
+    }
+    # @TODO rename
+    available_answers_and_labels = []
+    if answer_field in (targets_value_mapping or {}):
+        for label, answer in targets_value_mapping[answer_field].items():
+            available_answers_and_labels.append((answer, label))
+        for label in used_dataset_answers:
+            if not any(label == label for _, label in available_answers_and_labels):
+                raise ValueError(
+                    f"Label {label} in dataset is not present in targets_value_mapping."
+                )
+    else:
+        for answer in used_dataset_answers:
+            available_answers_and_labels.append((answer, answer))
+
+    new_samples = []
+    for sample in samples:
+        new_sample = _RemappedSample(
+            # @TODO include everything by default
+            features={
+                k: sample[v]
+                for k, v in features_field_mapping.items()
+            },
+            target_field_name=answer_field,
+            target_value=(
+                (targets_value_mapping or {}).get(answer_field, {})
+            ).get(
+                sample[answer_dataset_field], sample[answer_dataset_field]
+            ),
+            target_available_values=[x[0] for x in available_answers_and_labels],
+            target_available_value2label=dict(available_answers_and_labels),
+            target_dataset_field_name=answer_dataset_field,
+            domain_context=domain_context,
+            sample_context=None if context_dataset_field is None else sample[context_dataset_field],
+        )
+        new_samples.append(new_sample)
+    return new_samples
+
+
+def _get_samples_answer_logprobs(
+    trompt: "TemplatedPrompt",
     configuration: ConfigSpace.Configuration,
     engine: str,
-    samples: List[Dict],
-    dataset_answer_field="answer",
-    dataset_answer_mapping:Dict[Any,str]={True:"{{answer_yes}}", False:"{{answer_no}}"},
-    dataset_context_field:Optional[str]=None, # @TODO make functions?
-    domain_context:Optional[str]=None,
+    samples: List[_RemappedSample],
 ) -> List[Dict]:
-    # @TODO make part of task
-    available_answers = set(dataset_answer_mapping.keys())
-    used_answers = {sample[dataset_answer_field] for sample in samples}
-    if not used_answers.issubset(available_answers):
-        raise ValueError()
-    available_answers = sorted(available_answers)
-
     sample_dicts = []
     for sample in samples:
         known_values = dict(
-            {k: v for k, v in sample.items() if k != dataset_answer_field},
-            domain_context=domain_context,
-            question_context=None if dataset_context_field is None else sample[dataset_context_field],
+            sample.features,
+            # @TODO merge into features?
+            domain_context=sample.domain_context,
+            # @TODO rename from question_context?
+            question_context=sample.sample_context,
         )
         answer2logprob = {
-            answer: trompt.get_answer_logprobs(
+            answer: trompt._get_answer_logprobs(
                 engine=engine,
                 known_values=known_values,
-                answer=dataset_answer_mapping[answer],
+                answer=answer,
                 configuration=configuration,
-                answer_field=dataset_answer_field,
+                answer_field=sample.target_field_name,
             )["total"]
-            for answer in available_answers
+            for answer in sample.target_available_values
         }
         answer2logprob = {k: v for k, v in answer2logprob.items()}
         sample_dicts.append(answer2logprob)
     return sample_dicts
 
 
-def get_samples_answers_loss(
-    available_answers, #@TODO drop
-    samples: List[Dict],
+def _get_samples_answers_loss(
+    samples: List[_RemappedSample],
     sample_answer_logprobs: List[Dict],
     temperature:float,
     biases: List[float],
-    dataset_answer_field="answer",
     loss_name:str="sqcost",
 ) -> float:
-    # @TODO rename sqcost
     if loss_name not in ["sqcost", "logloss", "accuracy"]:
         raise NotImplementedError()
     if len(samples) != len(sample_answer_logprobs):
         raise ValueError()
 
+    available_answers = samples[0].target_available_values
     answer2bias = dict(zip(available_answers, list(biases) + [0.]))
     totloss = 0
     for sample, answer_logprobs in zip(samples, sample_answer_logprobs):
-        correct_answer = sample[dataset_answer_field]
+        correct_answer = sample.target_value
         answer2logprob = dict(answer_logprobs)
         answer2logprob = {k: (answer2bias[k] + v)/temperature for k, v in answer2logprob.items()}
         answer2logprob = {
@@ -89,19 +150,16 @@ def get_samples_answers_loss(
     return totloss / len(samples)
 
 
-def optimize_samples_answers_parameters(
-    available_answers: List[str], #@TODO drop
-    samples: List[Dict],
+def _optimize_samples_answers_parameters(
+    samples: List[_RemappedSample],
     sample_answer_logprobs: List[Dict],
-    dataset_answer_field="answer",
     optimization_loss_name="sqcost",
 ) -> Dict:
+    available_answers = list(samples[0].target_available_values)
     opt = scipy.optimize.minimize(
-        lambda x: get_samples_answers_loss(
-            available_answers=available_answers,
+        lambda x: _get_samples_answers_loss(
             samples=samples,
             sample_answer_logprobs=sample_answer_logprobs,
-            dataset_answer_field=dataset_answer_field,
             temperature=x[0],
             biases=x[1:],
             loss_name=optimization_loss_name
@@ -117,26 +175,23 @@ def optimize_samples_answers_parameters(
     )
 
 
-def evaluate_samples_answers(
-    available_answers: List[str], #@TODO drop
+def _evaluate_remapped_samples_answers(
     samples: List[Dict],
     sample_answer_logprobs: List[Dict],
-    dataset_answer_field="answer",
     answer2bias:Optional[Dict[Any,float]]=None,
     temperature:Optional[float]=None,
 ) -> Dict:
     temperature = 1 if temperature is None else temperature
+    available_answers = samples[0].target_available_values
     if answer2bias is None:
         answer2bias = dict(zip(available_answers, [0.] * len(available_answers)))
     biases = list(answer2bias.values())
     biases = [x-biases[-1] for x in biases[:-1]]
 
     def get_loss(loss_name):
-        return get_samples_answers_loss(
-            available_answers=available_answers,
+        return _get_samples_answers_loss(
             samples=samples,
             sample_answer_logprobs=sample_answer_logprobs,
-            dataset_answer_field=dataset_answer_field,
             temperature=temperature,
             biases=biases,
             loss_name=loss_name,
@@ -151,39 +206,73 @@ def evaluate_samples_answers(
     )
 
 
-def optimize_and_evaluate_trompt_samples(
-    trompt: TemplatedPrompt,
-    configuration: ConfigSpace.Configuration,
-    engine: str,
+def evaluate_samples_answers(
     samples: List[Dict],
-    dataset_answer_field:str="answer",
-    dataset_answer_mapping:Dict[Any,str]={True:"{{answer_yes}}", False:"{{answer_no}}"},
-    dataset_context_field:Optional[str]=None, # @TODO make functions?
+    sample_answer_logprobs: List[Dict],
+    # @TODO update optionals
+    answer2bias:Optional[Dict[Any,float]]=None,
+    temperature:Optional[float]=None,
+    features_field_mapping:Optional[Dict[str,str]]=None,
+    targets_field_mapping:Optional[Dict[str,str]]=None,
+    targets_value_mapping:Optional[Dict[str,Dict[str,str]]]=None,
     domain_context:Optional[str]=None,
+    context_dataset_field:Optional[str]=None,
+) -> Dict:
+    remapped_samples = _remap_samples(
+        samples=samples,
+        features_field_mapping=features_field_mapping,
+        targets_field_mapping=targets_field_mapping,
+        targets_value_mapping=targets_value_mapping,
+        domain_context=domain_context,
+        context_dataset_field=context_dataset_field,
+    )
+    return _evaluate_remapped_samples_answers(
+        samples=remapped_samples,
+        sample_answer_logprobs=sample_answer_logprobs,
+        answer2bias=answer2bias,
+        temperature=temperature,
+    )
+
+
+def optimize_and_evaluate_trompt_samples(
+    trompt: "TemplatedPrompt",
+    engine: str,
+    configuration: ConfigSpace.Configuration,
+    samples: Union[List[Dict],"datasets.Dataset"],
+    # dataset_answer_field:str="answer",
+    # dataset_answer_mapping:Dict[Any,str]={True:"{{answer_yes}}", False:"{{answer_no}}"},
+    # dataset_context_field:Optional[str]=None, # @TODO make functions?
+    features_field_mapping: Dict[str, str],
+    targets_field_mapping: Dict[str, str],
+    targets_value_mapping: Dict[str, Dict[Any, str]],
+    # @TODO used how?
+    domain_context:Optional[str]=None,
+    context_dataset_field:Optional[str]=None,
     optimization_loss_name:str="sqcost",
 ) -> Dict:
-    sample_answer_logprobs = get_samples_answer_logprobs(
+    remapped_samples = _remap_samples(
+        samples=samples,
+        features_field_mapping=features_field_mapping,
+        targets_field_mapping=targets_field_mapping,
+        targets_value_mapping=targets_value_mapping,
+        domain_context=domain_context,
+        context_dataset_field=context_dataset_field,
+    )
+
+    sample_answer_logprobs = _get_samples_answer_logprobs(
         trompt=trompt,
         configuration=configuration,
         engine=engine,
-        samples=samples,
-        dataset_answer_field=dataset_answer_field,
-        dataset_answer_mapping=dataset_answer_mapping,
-        dataset_context_field=dataset_context_field,
-        domain_context=domain_context,
+        samples=remapped_samples,
     )
-    optimal_parameters = optimize_samples_answers_parameters(
-        available_answers=list(dataset_answer_mapping.keys()),
-        samples=samples,
+    optimal_parameters = _optimize_samples_answers_parameters(
+        samples=remapped_samples,
         sample_answer_logprobs=sample_answer_logprobs,
-        dataset_answer_field=dataset_answer_field,
         optimization_loss_name=optimization_loss_name,
     )
-    return evaluate_samples_answers(
-        available_answers=list(dataset_answer_mapping.keys()),
-        samples=samples,
+    return _evaluate_remapped_samples_answers(
+        samples=remapped_samples,
         sample_answer_logprobs=sample_answer_logprobs,
-        dataset_answer_field=dataset_answer_field,
         temperature=optimal_parameters["temperature"],
         answer2bias=optimal_parameters["answer2bias"],
     )
