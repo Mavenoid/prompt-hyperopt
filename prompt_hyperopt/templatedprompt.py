@@ -14,8 +14,25 @@ from prompt_hyperopt import sampleevaluation
 
 @dataclass
 class TemplatedPrompt:
-    """Templated prompt which can be optimized."""
+    """Templated prompt which can be optimized.
 
+    The templated prompt consists of a prompt string in the form of a
+    jinja2 template, and a number of lists of value options for
+    variables in the template. The prompt is formatted by replacing
+    variables with values from the options lists, along with any
+    provided known values. The prompt is then evaluated by the
+    provided engine, and the result is used to optimize the
+    configuration of the prompt.
+
+    Parameters
+    ----------
+    prompt : str
+        The prompt string, in the form of a jinja2 template.
+    options : Dict[str, List[Any]]
+        A dictionary of lists of options for variables in the prompt.
+        These too can be jinja2 templates and options can be filled
+        recursively.
+    """
     prompt: str
     options: Dict[str,Tuple[Any,List[Any]]]
 
