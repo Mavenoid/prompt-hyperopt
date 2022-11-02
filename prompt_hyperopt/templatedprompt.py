@@ -1,3 +1,4 @@
+import functools
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, List, Tuple
 
@@ -201,4 +202,9 @@ class TemplatedPrompt:
                 answer2bias=best_results["answer2bias"],
             ),
         )
+
+    @functools.wraps(optimize_greedily)
+    def optimize(self, *args, **kwargs):
+        return self.optimize_greedily(*args, **kwargs)
+
 
