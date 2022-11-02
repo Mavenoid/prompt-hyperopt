@@ -69,6 +69,7 @@ class TemplatedPrompt:
         for k, v in configuration.get_dictionary().items():
             key = k.split("____")[-1]
             if isinstance(v, int):
+                # @TODO change
                 available_values = configuration.configuration_space.get_hyperparameters_dict()[k].meta.get("values")
                 if available_values:
                     formatted[key] = available_values[v]
