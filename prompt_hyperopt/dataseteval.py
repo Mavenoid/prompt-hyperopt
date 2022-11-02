@@ -12,18 +12,18 @@ def evaluate_boolean_dataset(
     engine: str,
     config: ConfigSpace.ConfigurationSpace,
     dataset: "datasets.Dataset",
-    features_field_mapping:Dict[str,str],
-    targets_field_mapping:Dict[str,str],
-    targets_value_mapping:Optional[Dict[str,Dict[Any,str]]]=None,
-    available_answers=[True,False],
+    features_field_mapping: Dict[str, str],
+    targets_field_mapping: Dict[str, str],
+    targets_value_mapping: Optional[Dict[str, Dict[Any, str]]] = None,
+    available_answers=[True, False],
     domain_context=None,
-    start_index=0, #@TODO support None
-    stop_index=8, #@TODO support None
-    optimize_parameters:bool=False,
+    start_index=0,  # @TODO support None
+    stop_index=8,  # @TODO support None
+    optimize_parameters: bool = False,
     optimization_loss_name="sqcost",
-    answer2bias:Optional[Dict[Any,float]]=None,
-    temperature:Optional[float]=None,
-    uncalibrated_confidences_weight:float=1e-3,
+    answer2bias: Optional[Dict[Any, float]] = None,
+    temperature: Optional[float] = None,
+    uncalibrated_confidences_weight: float = 1e-3,
 ) -> Dict:
     """Evaluate a TemplatedPrompt on a boolean dataset."""
     # @TODO change to only support OptimizedPrompt?
@@ -67,7 +67,7 @@ def evaluate_boolean_dataset(
     return results
 
 
-#@TODO update
+# @TODO update
 def evaluate_boolq(
     engine: str,
     trompt: TemplatedPrompt,
@@ -76,10 +76,10 @@ def evaluate_boolq(
     domain_context=None,
     start_index=0,
     stop_index=8,
-    optimize_parameters:bool=False,
+    optimize_parameters: bool = False,
     optimization_loss_name="sqcost",
-    answer2bias:Optional[Dict]=None,
-    temperature:Optional[float]=None,
+    answer2bias: Optional[Dict] = None,
+    temperature: Optional[float] = None,
 ) -> Dict:
     """Evaluate a TemplatedPrompt on the BoolQ dataset."""
     if dataset is None:
@@ -92,7 +92,7 @@ def evaluate_boolq(
         dataset_context_field="passage",
         dataset_question_field="question",
         dataset_answer_field="answer",
-        dataset_answer_mapping={True:"{{answer_yes}}", False:"{{answer_no}}"},
+        dataset_answer_mapping={True: "{{answer_yes}}", False: "{{answer_no}}"},
         domain_context=domain_context,
         start_index=start_index,
         stop_index=stop_index,

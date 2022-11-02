@@ -33,11 +33,14 @@ class TemplatedPrompt:
         These too can be jinja2 templates and options can be filled
         recursively.
     """
+
     prompt: str
-    options: Dict[str,Tuple[Any,List[Any]]]
+    options: Dict[str, Tuple[Any, List[Any]]]
 
     # Optimized parameters.
-    _configuration_space: ConfigSpace.ConfigurationSpace = field(compare=False, default=None, hash=False, init=False, repr=False)
+    _configuration_space: ConfigSpace.ConfigurationSpace = field(
+        compare=False, default=None, hash=False, init=False, repr=False
+    )
     _configuration: ConfigSpace.Configuration = field(init=False, default=None)
     _temperature: float = field(init=False, default=1.0)
     _answer2bias: Dict[str, float] = field(init=False, default_factory=dict)
@@ -59,9 +62,9 @@ class TemplatedPrompt:
 
     def _format_options(
         self,
-        configuration: Optional[ConfigSpace.Configuration]=None,
+        configuration: Optional[ConfigSpace.Configuration] = None,
         **known_values: Dict,
-    ) -> Dict[str,Any]:
+    ) -> Dict[str, Any]:
         # @TODO optimize
         configuration = configuration or self._configuration
 
@@ -70,7 +73,11 @@ class TemplatedPrompt:
             key = k.split("____")[-1]
             if isinstance(v, int):
                 # @TODO change
-                available_values = configuration.configuration_space.get_hyperparameters_dict()[k].meta.get("values")
+                available_values = (
+                    configuration.configuration_space.get_hyperparameters_dict()[
+                        k
+                    ].meta.get("values")
+                )
                 if available_values:
                     formatted[key] = available_values[v]
                     continue
@@ -79,8 +86,8 @@ class TemplatedPrompt:
 
         env = jinja2.nativetypes.NativeEnvironment(
             keep_trailing_newline=True,
-            optimized = False,
-            extensions=["jinja2.ext.debug","jinja2.ext.do","jinja2.ext.loopcontrols"],
+            optimized=False,
+            extensions=["jinja2.ext.debug", "jinja2.ext.do", "jinja2.ext.loopcontrols"],
         )
         while True:
             any_change = False
@@ -88,7 +95,7 @@ class TemplatedPrompt:
             for k, v in formatted.items():
                 if isinstance(v, str):
                     try:
-                        args = dict(globals(), **formatted) # @TODO locals or not
+                        args = dict(globals(), **formatted)  # @TODO locals or not
                         nv = env.from_string(v).render(**args)
                         if nv != v:
                             formatted[k] = nv
@@ -107,7 +114,7 @@ class TemplatedPrompt:
 
     def __call__(
         self,
-        configuration: Optional[ConfigSpace.Configuration]=None,
+        configuration: Optional[ConfigSpace.Configuration] = None,
         **known_values: Dict,
     ) -> str:
         """Format prompt with the current configuration and provided arguments"""
@@ -120,10 +127,10 @@ class TemplatedPrompt:
     def _get_answer_logprobs(
         self,
         engine: str,
-        known_values:Dict,
-        answer:str,
-        configuration: Optional[ConfigSpace.Configuration]=None,
-        answer_field:str="answer",
+        known_values: Dict,
+        answer: str,
+        configuration: Optional[ConfigSpace.Configuration] = None,
+        answer_field: str = "answer",
     ) -> Dict:
         """Returns a dict with token_logprobs, mean, and total."""
         configuration = configuration or self._configuration
@@ -133,25 +140,36 @@ class TemplatedPrompt:
         )
         reference_prompt = self(
             configuration,
-            **{answer_field: answer+gpt.ENDOFANSWER, **known_values},
+            **{answer_field: answer + gpt.ENDOFANSWER, **known_values},
         )
         evaluation_prompt = self(
             configuration,
             **{answer_field: answer, **known_values},
         )
-        if gpt.ENDOFANSWER not in empty_prompt or gpt.ENDOFANSWER not in reference_prompt:
+        if (
+            gpt.ENDOFANSWER not in empty_prompt
+            or gpt.ENDOFANSWER not in reference_prompt
+        ):
             raise ValueError("Start-of-answer token must be encoded exactly.")
 
         completion_start_index = empty_prompt.rfind(gpt.ENDOFANSWER)
-        completion_start_token_position = len(gpt.gpt_tokenizer.encode(empty_prompt[:completion_start_index].strip()))
+        completion_start_token_position = len(
+            gpt.gpt_tokenizer.encode(empty_prompt[:completion_start_index].strip())
+        )
         completion_end_index = reference_prompt.rfind(gpt.ENDOFANSWER)
-        completion_end_token_position = len(gpt.gpt_tokenizer.encode(reference_prompt[:completion_end_index].strip()))
+        completion_end_token_position = len(
+            gpt.gpt_tokenizer.encode(reference_prompt[:completion_end_index].strip())
+        )
 
         if completion_start_token_position == completion_end_token_position:
             raise ValueError()
 
-        logprobs = gpt.get_model_logprobs(engine=engine, prompt=evaluation_prompt.strip())
-        answer_logprobs = logprobs[completion_start_token_position:completion_end_token_position]
+        logprobs = gpt.get_model_logprobs(
+            engine=engine, prompt=evaluation_prompt.strip()
+        )
+        answer_logprobs = logprobs[
+            completion_start_token_position:completion_end_token_position
+        ]
 
         if not len(answer_logprobs):
             raise ValueError()
@@ -165,17 +183,17 @@ class TemplatedPrompt:
     # @TODO move evaluate_task
     def optimize_greedily(
         self,
-        engine:str,
+        engine: str,
         examples,
         # question_field:str="question",
         # answer_field:str="answer",
-        features_field_mapping:Dict[str,str]=None,
+        features_field_mapping: Dict[str, str] = None,
         # @TODO maybe reverse these?
         # @TODO rename these?
         # Template field -> Dataset field
-        targets_field_mapping:Dict[str,str]=None,
+        targets_field_mapping: Dict[str, str] = None,
         # Dataset field -> Dataset value -> Template value
-        targets_value_mapping:Dict[str,Dict[Any,str]]=None,
+        targets_value_mapping: Dict[str, Dict[Any, str]] = None,
     ) -> None:
         """
         Optimize the prompt greedily by evaluating the prompt on the provided examples.
@@ -187,12 +205,16 @@ class TemplatedPrompt:
             be the name of an OpenAI engine name, or a huggingface model
             name.
         """
-        best_configuration, best_results, best_cost = optimization.configuration_space_greedy_climb(
+        (
+            best_configuration,
+            best_results,
+            best_cost,
+        ) = optimization.configuration_space_greedy_climb(
             self._configuration_space,
             lambda config: sampleevaluation.optimize_and_evaluate_trompt_samples(
                 self,
                 engine=engine,
-                configuration=config, #@TODO rename
+                configuration=config,  # @TODO rename
                 samples=examples,
                 features_field_mapping=features_field_mapping,
                 targets_field_mapping=targets_field_mapping,
@@ -246,7 +268,7 @@ class OptimizedPrompt:
         self,
         engine: str,
         known_values: Dict,
-        answer_field: str="answer",
+        answer_field: str = "answer",
     ) -> Dict:
         answer2logprob_data = {}
         for answer in self.answer2bias.keys():
@@ -259,15 +281,13 @@ class OptimizedPrompt:
             )
         answer2prob = {
             answer: np.exp(
-                (data["total"] + self.answer2bias[answer])
-                / (1e-3 + self.temperature)
+                (data["total"] + self.answer2bias[answer]) / (1e-3 + self.temperature)
             )
             for answer, data in answer2logprob_data.items()
         }
         total = sum(answer2prob.values())
         answer2prob = {
-            answer: logprob / total
-            for answer, logprob in answer2prob.items()
+            answer: logprob / total for answer, logprob in answer2prob.items()
         }
         return answer2prob
 

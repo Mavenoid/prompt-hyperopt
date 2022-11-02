@@ -16,10 +16,10 @@ def configuration_space_greedy_climb(
     random_exploration_chance: float = 0.2,
     min_relative_improvement: float = 1e-3,
     warmup_iterations: Optional[int] = None,
-    new_best_callback: Optional[Callable[[Configuration,Any,float],bool]] = None,
-    included_hyperparameter_names: Optional[Set[str]]=None,
-    excluded_hyperparameter_names: Optional[Set[str]]=None,
-    early_termination_cost: Optional[float]=None,
+    new_best_callback: Optional[Callable[[Configuration, Any, float], bool]] = None,
+    included_hyperparameter_names: Optional[Set[str]] = None,
+    excluded_hyperparameter_names: Optional[Set[str]] = None,
+    early_termination_cost: Optional[float] = None,
     verbosity: int = 0,
 ) -> Tuple[Configuration, Any, float]:
     """
@@ -74,7 +74,9 @@ def configuration_space_greedy_climb(
         if it == 0:
             next_arr_conf = np.nan_to_num(best_configuration.get_array())
             change = None
-        elif (last_eval and random.random() < random_exploration_chance) or it <= (warmup_iterations or 0):
+        elif (last_eval and random.random() < random_exploration_chance) or it <= (
+            warmup_iterations or 0
+        ):
             change = None
             next_configuration = random_sampler()
             next_arr_conf = np.nan_to_num(next_configuration.get_array())
@@ -83,12 +85,14 @@ def configuration_space_greedy_climb(
             change = (next_hp_index, next_hp_value_index)
             hp = configuration_space.get_hyperparameters()[next_hp_index]
             if (
-                not isinstance(
-                    hp, CategoricalHyperparameter
-                ) or (
-                    excluded_hyperparameter_names and hp.name in excluded_hyperparameter_names
-                ) or (
-                    included_hyperparameter_names and hp.name not in included_hyperparameter_names
+                not isinstance(hp, CategoricalHyperparameter)
+                or (
+                    excluded_hyperparameter_names
+                    and hp.name in excluded_hyperparameter_names
+                )
+                or (
+                    included_hyperparameter_names
+                    and hp.name not in included_hyperparameter_names
                 )
             ):
                 next_hp_index += 1
@@ -123,10 +127,12 @@ def configuration_space_greedy_climb(
                         "%s Evaluated change (cost: %f): %s -> %r.",
                         "New best!" if cost < best_cost else "No change.",
                         cost,
-                        hp.name, hp.choices[change[1]]
+                        hp.name,
+                        hp.choices[change[1]],
                     )
                 else:
-                    logger.info("%s Evaluated non-neighboring configuration (cost: %f).",
+                    logger.info(
+                        "%s Evaluated non-neighboring configuration (cost: %f).",
                         "New best!" if cost < best_cost else "No change.",
                         cost,
                     )
@@ -139,7 +145,7 @@ def configuration_space_greedy_climb(
                 best_arr_conf = next_arr_conf
                 if change is not None:
                     last_change_hp_index, last_change_hp_value_index = change
-                elif cost < (1+min_relative_improvement) * last_change_cost:
+                elif cost < (1 + min_relative_improvement) * last_change_cost:
                     last_change_hp_index = next_hp_index
                     last_change_hp_value_index = next_hp_value_index
                     last_change_cost = best_cost
@@ -150,10 +156,7 @@ def configuration_space_greedy_climb(
                         best_cost,
                     ):
                         break
-        if (
-            early_termination_cost is not None
-            and best_cost <= early_termination_cost
-        ):
+        if early_termination_cost is not None and best_cost <= early_termination_cost:
             break
         if (
             change is not None
