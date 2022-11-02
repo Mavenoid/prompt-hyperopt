@@ -48,7 +48,7 @@ test_examples = examples[-3:]
 
 # @TODO investigate why "" gets encoded as None
 
-trompt = prompt_hyperopt.TemplatedPrompt(
+trompt = TemplatedPrompt(
     prompt="""{{example}}
 
 {{preamble}}{{options}}

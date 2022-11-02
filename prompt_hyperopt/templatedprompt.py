@@ -5,9 +5,10 @@ import ConfigSpace
 import jinja2, jinja2.nativetypes
 import numpy as np
 
-from . import configurationspace
-from . import optimization
-from . import gpt
+from prompt_hyperopt import configurationspace
+from prompt_hyperopt import optimization
+from prompt_hyperopt import gpt
+from prompt_hyperopt import sampleevaluation
 
 
 @dataclass

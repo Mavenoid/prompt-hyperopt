@@ -1,12 +1,12 @@
 import datasets
 import ConfigSpace
-import logging
 import scipy.optimize
 import numpy as np
 import sys
-from typing import Any, Dict, Optional
-from .templatedprompt import TemplatedPrompt
+from typing import Any, Dict, Optional, Union
+from prompt_hyperopt import sampleevaluation
 
+from prompt_hyperopt.templatedprompt import OptimizedPrompt, TemplatedPrompt
 
 def evaluate_boolean_dataset(
     trompt: TemplatedPrompt,

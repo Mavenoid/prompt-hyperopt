@@ -1,6 +1,6 @@
 import pytest
 
-from .templatedprompt import TemplatedPrompt
+from prompt_hyperopt.templatedprompt import TemplatedPrompt
 
 @pytest.fixture
 def single_alternative_trompt():

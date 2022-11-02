@@ -1,8 +1,7 @@
 from typing import Any, Callable, Dict, Optional, Tuple
 import numpy as np
 
-from . import gpt
-from .templatedprompt import TemplatedPrompt
+from prompt_hyperopt.templatedprompt import TemplatedPrompt
 
 import pytest
 

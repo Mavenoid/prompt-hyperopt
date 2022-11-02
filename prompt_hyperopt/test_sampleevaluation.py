@@ -1,9 +1,7 @@
 import pytest
 
-import ConfigSpace
-
-from .templatedprompt import TemplatedPrompt
-from . import sampleevaluation
+from prompt_hyperopt.templatedprompt import TemplatedPrompt
+from prompt_hyperopt import sampleevaluation
 
 
 @pytest.fixture
