@@ -187,13 +187,13 @@ class TemplatedPrompt:
         examples,
         # question_field:str="question",
         # answer_field:str="answer",
-        features_field_mapping: Dict[str, str] = None,
         # @TODO maybe reverse these?
         # @TODO rename these?
         # Template field -> Dataset field
-        targets_field_mapping: Dict[str, str] = None,
+        targets_field_mapping: Dict[str, str],
+        features_field_mapping: Optional[Dict[str, str]] = None,
         # Dataset field -> Dataset value -> Template value
-        targets_value_mapping: Dict[str, Dict[Any, str]] = None,
+        targets_value_mapping: Optional[Dict[str, Dict[Any, str]]] = None,
     ) -> None:
         """
         Optimize the prompt greedily by evaluating the prompt on the provided examples.
