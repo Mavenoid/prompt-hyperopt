@@ -69,6 +69,8 @@ Out of the box, prompts which seem to provide mostly accurate predictions for on
 ### Sentiment analysis
 
 ```
+from prompt_hyperopt import TemplatedPrompt
+
 trompt = TemplatedPrompt(
     prompt="""{{preamble}}
 
@@ -78,14 +80,34 @@ Sentiment: {{sentiment}}
     options=dict(
         answer_positive=["Positive", "happy", "Positive sentiment", "🙂", "😀"],
         answer_negative=["Negative", "sad", "Negative sentiment", "☹", "😡", "😞"],
-        answer_neutral=["Neutral", "neither", "ambivalent", "Neutral sentiment", "😐", "😶"],
-        preamble=["", "Sentiment analysis", "Tell whether the sentence is Positive or Negative"]
+        preamble=["Sentiment analysis.", "Predict whether the sentence is Positive or Negative"]
     ),
 )
 
-trompt.optimize()
+examples = [
+    dict(sentence="I am happy.", sentiment="Positive"),
+    dict(sentence="I am sad.", sentiment="Negative"),
+    dict(sentence="I am", sentiment="Neutral"),
+]
 
-trompt.complete(sentence="They always put too much cream")
+trompt.optimize(
+    "gpt2",
+    examples,
+    features_field_mapping={"sentence": "sentence"},
+    targets_field_mapping={"sentiment": "sentiment"},
+    targets_value_mapping={
+        "sentiment": {
+            "Positive": "{{answer_positive}}",
+            "Negative": "{{answer_negative}}",
+        }
+    }
+)
+
+print("Optimized prompt:")
+print(trompt(sentence="Coffee is good"))
+
+print("Prediction:")
+print(trompt.predict(sentence="Coffee is good"))
 ```
 
 ## Results

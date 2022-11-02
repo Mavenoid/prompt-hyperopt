@@ -5,7 +5,7 @@ import difflib
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, Constant
 
-from .optimization import configuration_space_greedy_climb
+from prompt_hyperopt.optimization import configuration_space_greedy_climb
 
 
 @pytest.fixture
