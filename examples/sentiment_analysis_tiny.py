@@ -1,7 +1,9 @@
-import prompt_hyperopt.datasets
+import logging
+import os
+
+import prompt_hyperopt.dataseteval
 import prompt_hyperopt.optimization
 from prompt_hyperopt import TemplatedPrompt
-import logging
 
 
 logging.basicConfig(level=logging.DEBUG)
