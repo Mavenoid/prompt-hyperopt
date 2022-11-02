@@ -8,6 +8,9 @@ from prompt_hyperopt import sampleevaluation
 
 from prompt_hyperopt.templatedprompt import OptimizedPrompt, TemplatedPrompt
 
+
+
+# @TODO rename as it is more general than just boolean datasets
 def evaluate_boolean_dataset(
     trompt: TemplatedPrompt,
     engine: str,
