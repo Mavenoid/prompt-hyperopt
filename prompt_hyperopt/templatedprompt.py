@@ -16,12 +16,13 @@ class TemplatedPrompt:
     """Templated prompt which can be optimized."""
 
     prompt: str
-    available_answers: Optional[List[str]] # @TODO should this be here?
     options: Dict[str,Tuple[Any,List[Any]]]
 
     # Optimized parameters.
     _configuration_space: ConfigSpace.ConfigurationSpace = field(compare=False, default=None, hash=False, init=False, repr=False)
     _configuration: ConfigSpace.Configuration = field(init=False, default=None)
+    _temperature: float = field(init=False, default=1.0)
+    _answer2bias: Dict[str, float] = field(init=False, default_factory=dict)
 
     def __post_init__(self):
         self._configuration_space = self._make_configuration_space()
@@ -97,7 +98,7 @@ class TemplatedPrompt:
         )["prompt"].strip()
 
     # @TODO clean up
-    def get_answer_logprobs(
+    def _get_answer_logprobs(
         self,
         engine: str,
         known_values:Dict,
@@ -143,22 +144,61 @@ class TemplatedPrompt:
         )
 
     # @TODO move evaluate_task
-    def optimize_greedily(self, engine:str, evaluate_task, examples) -> None:
-        self._configuration = optimization.configuration_space_greedy_climb(
+    def optimize_greedily(
+        self,
+        engine:str,
+        examples,
+        # question_field:str="question",
+        # answer_field:str="answer",
+        features_field_mapping:Dict[str,str]=None,
+        # @TODO maybe reverse these?
+        # @TODO rename these?
+        # Template field -> Dataset field
+        targets_field_mapping:Dict[str,str]=None,
+        # Dataset field -> Dataset value -> Template value
+        targets_value_mapping:Dict[str,Dict[Any,str]]=None,
+    ) -> None:
+        """
+        Optimize the prompt greedily by evaluating the prompt on the provided examples.
+
+        Parameters
+        ----------
+        engine : str
+            The engine to use for evaluation. Currently this can either
+            be the name of an OpenAI engine name, or a huggingface model
+            name.
+        """
+        best_configuration, best_results, best_cost = optimization.configuration_space_greedy_climb(
             self._configuration_space,
-            lambda config: evaluate_task(
-                engine,
-                config,
-                optimize_parameters=True,
-                optimization_loss_name="sqcost",
-                start_index=0,
-                stop_index=len(examples),
-                dataset=examples,
-                dataset_context_field=None,
-                dataset_question_field="sentence",
-                dataset_answer_field="sentiment",
-                dataset_answer_mapping={"Positive":"{{answer_positive}}", "Negative":"{{answer_negative}}", "Neutral":"{{answer_neutral}}"},
+            lambda config: sampleevaluation.optimize_and_evaluate_trompt_samples(
+                self,
+                engine=engine,
+                configuration=config, #@TODO rename
+                samples=examples,
+                features_field_mapping=features_field_mapping,
+                targets_field_mapping=targets_field_mapping,
+                targets_value_mapping=targets_value_mapping,
             ),
             lambda results: results["sqcost"] * (1 + results["logloss"]),
             max_iterations=32,
         )
+        # @TODO remove
+        self._configuration = best_configuration
+        self._temperature = best_results["temperature"]
+        self._answer2bias = best_results["answer2bias"]
+        return dict(
+            configuration=self._configuration,
+            cost=best_cost,
+            accuracy=best_results["accuracy"],
+            logloss=best_results["logloss"],
+            temperature=best_results["temperature"],
+            answer2bias=best_results["answer2bias"],
+            # @TODO avoid this repetition
+            optimized_prompt=OptimizedPrompt(
+                template=self,
+                configuration=best_configuration,
+                temperature=best_results["temperature"],
+                answer2bias=best_results["answer2bias"],
+            ),
+        )
+
