@@ -1,13 +1,9 @@
 import datasets
 import ConfigSpace
-import scipy.optimize
-import numpy as np
-import sys
 from typing import Any, Dict, Optional, Union
 from prompt_hyperopt import sampleevaluation
 
 from prompt_hyperopt.templatedprompt import OptimizedPrompt, TemplatedPrompt
-
 
 
 # @TODO rename as it is more general than just boolean datasets
