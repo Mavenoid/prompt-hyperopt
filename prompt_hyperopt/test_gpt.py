@@ -1,8 +1,6 @@
-from typing import Any, Callable, Dict, Optional, Tuple
-
 from prompt_hyperopt.templatedprompt import TemplatedPrompt
-
 import pytest
+
 
 @pytest.fixture
 def singular_qa_trompt():
