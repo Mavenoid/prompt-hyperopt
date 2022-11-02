@@ -83,7 +83,7 @@ options, including examples continuations that you would not like to see.
 possible_continuations = [
     examples[0]["continuation"],
     examples[1]["continuation"],
-    "I set fire to the bill."
+    "I set fire to the bill.",
     "So she ordered a pizza.",
     "Once upon a time...",
     "\n\n",
