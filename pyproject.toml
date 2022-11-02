@@ -4,6 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors=[
-    { "name": "Mavenoid", "email": "info@mavenoid.com" },
-    { "name": "Cenny Wenner", "email": "cwenner@gmail.com" },
+    "Mavenoid <info@mavenoid.com>",
+    "Cenny Wenner <cwenner@gmail.com>",
 ]
