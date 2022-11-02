@@ -16,9 +16,7 @@ def singular_qa_trompt():
 def test_distilgpt2_singular_qa_trompt(singular_qa_trompt):
     known_values = dict(question="Do there exist red apples?")
     logprobs_yes = singular_qa_trompt._get_answer_logprobs(
-        engine="distilgpt2",
-        answer="Yes",
-        known_values=known_values
+        engine="distilgpt2", answer="Yes", known_values=known_values
     )
     logprobs_no = singular_qa_trompt._get_answer_logprobs(
         engine="distilgpt2",
