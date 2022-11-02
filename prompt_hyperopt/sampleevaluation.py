@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 import datasets
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Dict, Optional, List, Union, TYPE_CHECKING
 
 import ConfigSpace
 import numpy as np
 import scipy.optimize
 import sys
+
+if TYPE_CHECKING:
+    from prompt_hyperopt.templatedprompt import TemplatedPrompt
 
 
 @dataclass
