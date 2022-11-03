@@ -151,7 +151,7 @@ print(trompt(story="<story>, continuation="<continuation>"))
 
 ## Interesting findings
 
-Out of the box, prompts which seem to provide mostly accurate predictions for one language model do not necessarily perform well for others, even bordering on random answers. Notably this can be observed for GPT3-curie 6.7B vs GPT3-davinci 175B. What we have found however is that by recalibrating token biases for the two models, then often high-performing prompts for one model are also high-performing for the other. This can be done by using the utility method TODO.
+Out of the box, prompts which seem to provide mostly accurate predictions for one language model do not necessarily perform well for others, even bordering on random answers. Notably this can be observed for GPT3-curie 6.7B vs GPT3-davinci 175B. What we have found however is that by recalibrating token biases for the two models, then often high-performing prompts for one model are also high-performing for the other. This can be done by running the optimize method without options.
 
 ## Examples
 
