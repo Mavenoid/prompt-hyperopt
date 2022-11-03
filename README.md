@@ -1,6 +1,6 @@
 # prompt-hyperopt
 
-More reliable prompt crafting though prompt templates, hyperparameter optimization from few examples, and calibration of and across language models.
+More reliable prompt crafting though templates, hyperparameter optimization from few examples, and calibration of and across language models.
 
 ![tests status](https://github.com/mavenoid/prompt-hyperopt/actions/workflows/tests.yml/badge.svg)
 
@@ -220,3 +220,7 @@ Persian (/ˈpɜːrʒən, -ʃən/), also known by its endonym Farsi (فارسی f
 Q: 「do iran and afghanistan speak the same language」 Yes or No?
 Answer. 「Yes」
 ```
+
+### License
+
+This package has been developed by [Mavenoid](https://www.mavenoid.com) and is released under MIT License.
