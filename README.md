@@ -1,3 +1,5 @@
+![logo](assets/logo.png)
+
 # prompt-hyperopt
 
 More reliable prompt crafting though templates, hyperparameter optimization from few examples, and calibration of and across language models.
