@@ -10,11 +10,11 @@ More reliable prompt crafting though templates, hyperparameter optimization from
 
 Prompt optimization offers a stuctured way to produce more reliable generation.
 
-Manually crafting reliable prompts can be a difficult and time-consuming task. It can seem like one experiment succeeds only to find the next example going on a seemingly random tangent. Adapting the prompt to fix one such misbehaving example often breaks a previously-tried example, and revalidating all examples manually is a time consuming.
+Manually crafting reliable prompts can be a difficult and time-consuming task. It can seem like one experiment succeeds only to find the next example going on a seemingly random tangent. Adapting the prompt to fix one such misbehaving example often breaks a previously-tried example. There should be a better way to develop good prompts.
 
 ## The solution
 
-Instead, humans should focus on generating ideas for the different ways a task prompt can be expressed. For example, maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it is separate from the task description? Maybe you want a preamble that explains what the task is about or what the generation should not do? When you see a failed generation, you can usually think of a few ways to adjust prompts to steer it in the right direction and so iteratively add more prompt options.
+Instead of ad-hoc modifications of prompts, Humans should focus on generating ideas for the different ways a task prompt can be expressed. For example, maybe you could use emojis 🙂/😞 instead of Positive/Negative for sentiment analysis? Maybe you could put quotes around the paragraph to make it clear that it is separate from the task description? Maybe you want a preamble that explains what the task is about or what the generation should not do? When you see a failed generation, you can usually think of a few ways to adjust prompts to steer it in the right direction and so iteratively add more prompt options.
 
 The task on the human is provide these variants, and the library is responsible for finding the alternative that performs the best with respect to the examples. The library provides intuitive curly-brace templates to express variants more compactly.
 
