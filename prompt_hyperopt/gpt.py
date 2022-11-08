@@ -28,9 +28,15 @@ OPENAI_API_ENGINE_NAMES = [
 ]
 
 
+def get_default_device() -> str:
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"
+
+
 @functools.lru_cache(128)
 def get_hf_gpt_model(
-    model_name: str, device: str = "cpu"
+    model_name: str, device: str = get_default_device(),
 ) -> transformers.AutoModelForCausalLM:
     """Utility method to load Hugging Face GPT models"""
     gc.collect()
@@ -44,7 +50,7 @@ def get_hf_gpt_model(
 @functools.lru_cache(512000)
 @torch.no_grad()
 def get_hf_gpt_logprobs(
-    engine: str, prompt: str, device: str = "cpu"
+    engine: str, prompt: str, device: str = get_default_device(),
 ) -> List[Optional[float]]:
     """Utility method to get logprobs generated via Hugging Face GPT models"""
     gpt_model = get_hf_gpt_model(engine, device=device)
@@ -71,7 +77,7 @@ def get_openai_logprobs(engine: str, prompt: str) -> List[Optional[float]]:
 
 
 def get_model_logprobs(
-    engine: str, prompt: str, device: str = "cpu"
+    engine: str, prompt: str, device: str = get_default_device(),
 ) -> List[Optional[float]]:
     """Utility method to get logprobs for various GPT models"""
     if engine in OPENAI_API_ENGINE_NAMES:
