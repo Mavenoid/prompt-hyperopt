@@ -4,9 +4,7 @@ from typing import List, Optional
 
 import transformers
 import openai
-
-
-# @TODO are more device control
+import torch
 
 
 gpt_tokenizer = transformers.AutoTokenizer.from_pretrained("gpt2")
@@ -44,6 +42,7 @@ def get_hf_gpt_model(
 
 
 @functools.lru_cache(512000)
+@torch.no_grad()
 def get_hf_gpt_logprobs(
     engine: str, prompt: str, device: str = "cpu"
 ) -> List[Optional[float]]:
