@@ -6,7 +6,6 @@ import transformers
 import openai
 import torch
 
-
 gpt_tokenizer = transformers.AutoTokenizer.from_pretrained("gpt2")
 ENDOFANSWER = "<|answer|>"  # @TODO use rare tokens?
 # @TODO check that these are complete
