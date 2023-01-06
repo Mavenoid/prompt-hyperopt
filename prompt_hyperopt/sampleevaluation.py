@@ -25,13 +25,14 @@ class _RemappedSample:
 
 def _remap_samples(
     samples,
-    features_field_mapping: Dict[str, str],
     targets_field_mapping: Dict[str, str],
+    features_field_mapping: Optional[Dict[str, str]]=None,
     targets_value_mapping: Optional[Dict[str, Dict[Any, str]]] = None,
     # @TODO drop in favor of features?
     domain_context: Optional[str] = None,
     context_dataset_field: Optional[str] = None,
 ) -> List[_RemappedSample]:
+    features_field_mapping = features_field_mapping or {}
     if len(targets_field_mapping) > 1:
         raise NotImplementedError(
             "Currently only optimizing a single target field at a time is supported."
@@ -60,7 +61,17 @@ def _remap_samples(
     for sample in samples:
         new_sample = _RemappedSample(
             # @TODO include everything by default
-            features={k: sample[v] for k, v in features_field_mapping.items()},
+            features=dict(
+                {
+                    k: sample[v]
+                    for k, v in features_field_mapping.items()
+                }, **{
+                    k: v
+                    for k, v in sample.items()
+                    if k not in features_field_mapping.values()
+                    and k not in targets_field_mapping.values()
+                }
+            ),
             target_field_name=answer_field,
             target_value=((targets_value_mapping or {}).get(answer_field, {})).get(
                 sample[answer_dataset_field], sample[answer_dataset_field]

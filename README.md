@@ -203,7 +203,7 @@ print(trompt.predict(sentence="Coffee is good"))
 
 ## Results
 
-On [Bool-Q](https://paperswithcode.com/sota/question-answering-on-boolq), prompt hyperoptimization produces an accuracy of 81.3 % with 32 examples for GPT-3 davinci, in contrast to previous results of GPT-3 few-shot on 32 examples. TODO confirm. TODO fill in more.
+On [Bool-Q](https://paperswithcode.com/sota/question-answering-on-boolq), prompt hyperoptimization produces an accuracy of 81.3 % with 32 examples for GPT-3 davinci, in contrast to previous results of GPT-3 few-shot on 32 examples. This should however be confirmed and made reproducible. Note that the `davinci` model was trained before the release of the Bool-Q dataset while the `instruct` and `text` models may have had access to it.
 
 Best found prompt for Bool-Q (with 1-shot examples):
 
